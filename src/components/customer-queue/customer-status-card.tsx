@@ -3,12 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  Building2,
+  CalendarClock,
   CheckCircle2,
   Clock3,
-  Hash,
   Phone,
-  ShieldCheck,
+  RefreshCw,
   UsersRound,
 } from "lucide-react";
 import { LeaveQueueDialog } from "@/components/customer-queue/leave-queue-dialog";
@@ -90,39 +89,42 @@ export function CustomerStatusCard({
   const showCustomerDetails = viewStatus === "waiting" || viewStatus === "released";
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-2xl items-center px-4 py-6 sm:px-6">
+    <div className="mx-auto flex min-h-screen w-full max-w-[430px] items-center px-3 py-3 sm:px-4 sm:py-5">
       <motion.section
         animate={{ opacity: 1, y: 0 }}
-        className="w-full overflow-hidden rounded-lg border bg-card shadow-[var(--shadow-panel)]"
+        className="w-full overflow-hidden rounded-[2rem] border border-border/70 bg-card shadow-[0_24px_60px_rgba(15,23,42,0.12)]"
         initial={{ opacity: 0, y: 16 }}
         transition={{ duration: 0.25 }}
       >
-        <div
-          className={cn(
-            "border-b p-5 sm:p-6",
-            viewStatus === "released" && "bg-success/10",
-            viewStatus === "expired" && "bg-warning/10",
-            viewStatus === "cancelled" && "bg-danger/10",
-          )}
-        >
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-muted-foreground">
-                <Building2 aria-hidden className="h-3.5 w-3.5" />
-                {entry.company_trade_name}
-              </div>
-              <h1 className="mt-4 text-2xl font-semibold tracking-normal text-foreground sm:text-3xl">
-                {statusCopy.title}
-              </h1>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                {statusCopy.description}
-              </p>
-            </div>
-            <StatusBadge status={entry.status} />
+        <header className="flex items-center justify-between gap-3 px-4 py-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <UsersRound aria-hidden className="h-4 w-4" />
           </div>
-        </div>
+          <div className="min-w-0 flex-1 text-center">
+            <h1 className="truncate text-sm font-semibold text-foreground">
+              Minha posicao na fila
+            </h1>
+            <p className="truncate text-[11px] text-muted-foreground">
+              {entry.company_trade_name}
+            </p>
+          </div>
+          <Button
+            aria-label="Atualizar"
+            className="h-9 w-9 rounded-full p-0"
+            disabled={refreshing}
+            size="icon"
+            type="button"
+            variant="ghost"
+            onClick={() => void refreshEntry()}
+          >
+            <RefreshCw
+              aria-hidden
+              className={cn("h-4 w-4", refreshing && "animate-spin")}
+            />
+          </Button>
+        </header>
 
-        <div className="space-y-5 p-5 sm:p-6">
+        <div className="space-y-3 px-4 pb-4">
           <AnimatePresence mode="wait">
             <motion.div
               animate={{ opacity: 1, y: 0 }}
@@ -131,9 +133,9 @@ export function CustomerStatusCard({
               key={viewStatus}
             >
               {showCustomerDetails ? (
-                <CustomerDetails entry={entry} />
+                <CustomerDetails entry={entry} viewStatus={viewStatus} />
               ) : (
-                <StatusOnly viewStatus={viewStatus} />
+                <StatusOnly statusCopy={statusCopy} viewStatus={viewStatus} />
               )}
             </motion.div>
           </AnimatePresence>
@@ -143,17 +145,17 @@ export function CustomerStatusCard({
           ) : null}
 
           {viewStatus === "released" && remainingSeconds !== null ? (
-            <div className="rounded-lg border border-success/30 bg-success/10 p-4 text-sm font-medium text-foreground">
+            <div className="rounded-2xl border border-success/30 bg-success/10 px-4 py-3 text-center text-xs font-semibold text-foreground">
               Tempo restante do link: {formatRemainingTime(remainingSeconds)}
             </div>
           ) : null}
 
-          <div className="flex flex-col gap-2 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-              <ShieldCheck aria-hidden className="h-3.5 w-3.5" />
+          <div className="flex items-center justify-between gap-3 border-t border-border/70 pt-3">
+            <p className="text-[11px] leading-4 text-muted-foreground">
               Telefone protegido e exibido apenas mascarado.
             </p>
             <Button
+              className="h-8 rounded-full px-3 text-[11px]"
               disabled={refreshing}
               size="sm"
               type="button"
@@ -169,69 +171,119 @@ export function CustomerStatusCard({
   );
 }
 
-function CustomerDetails({ entry }: { entry: PublicCustomerQueueEntry }) {
-  return (
-    <div className="space-y-4">
-      <div className="rounded-lg border bg-primary/10 p-5">
-        <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase text-primary">
-          <Hash aria-hidden className="h-3.5 w-3.5" />
-          Posicao atual
-        </p>
-        <p className="mt-3 text-5xl font-semibold tracking-normal text-foreground">
-          {entry.position ? String(entry.position) : "Atendimento"}
-        </p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Codigo de atendimento: {entry.ticket_code}
-        </p>
-      </div>
+function CustomerDetails({
+  entry,
+  viewStatus,
+}: {
+  entry: PublicCustomerQueueEntry;
+  viewStatus: CustomerViewStatus;
+}) {
+  const positionText = getPositionText(entry);
+  const peopleText = `${entry.party_size ?? 1} ${
+    entry.party_size === 1 ? "pessoa" : "pessoas"
+  }`;
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <InfoItem
-          icon={UsersRound}
-          label="Quantidade"
-          value={`${entry.party_size ?? 1} ${
-            entry.party_size === 1 ? "pessoa" : "pessoas"
-          }`}
-        />
+  return (
+    <div className="space-y-3">
+      <section
+        className={cn(
+          "relative flex h-[172px] flex-col items-center justify-center overflow-hidden rounded-[1.75rem] px-5 text-center text-white shadow-[0_18px_40px_rgba(15,118,110,0.24)]",
+          viewStatus === "released"
+            ? "bg-[linear-gradient(135deg,#10B981_0%,#0F766E_58%,#0F172A_100%)]"
+            : "bg-[linear-gradient(135deg,#0F766E_0%,#14B8A6_52%,#0F172A_100%)]",
+        )}
+      >
+        <div className="absolute -left-10 -top-12 h-32 w-32 rounded-full bg-white/15 blur-xl" />
+        <div className="absolute -bottom-12 -right-8 h-36 w-36 rounded-full bg-white/10 blur-xl" />
+        <p className="relative text-xs font-semibold uppercase tracking-[0.18em] text-white/75">
+          {viewStatus === "released" ? "Voce foi chamado" : "Posicao atual"}
+        </p>
+        <p className="relative mt-2 text-6xl font-bold leading-none tracking-normal">
+          {positionText}
+        </p>
+        <p className="relative mt-2 text-sm font-medium text-white/85">
+          {viewStatus === "released" ? "compareca ao atendimento" : "na fila de espera"}
+        </p>
+      </section>
+
+      <section className="rounded-[1.5rem] border border-border/70 bg-background p-4">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-sm font-bold text-primary-foreground">
+            {getCompanyInitial(entry.company_trade_name)}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-2">
+              <p className="truncate text-sm font-semibold text-foreground">
+                {entry.company_trade_name}
+              </p>
+              <StatusBadge className="shrink-0 text-[10px]" status={entry.status} />
+            </div>
+            <p className="mt-1 text-sm leading-5 text-muted-foreground">
+              {entry.customer_name ?? "Cliente"}, voce esta em{" "}
+              <span className="font-semibold text-foreground">{positionText}</span>{" "}
+              na fila para {peopleText}.
+            </p>
+          </div>
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+          <span>Codigo: {entry.ticket_code}</span>
+          <span>{entry.masked_customer_phone ?? "*****"}</span>
+        </div>
+      </section>
+
+      <section className="grid grid-cols-2 gap-2">
+        <InfoItem icon={UsersRound} label="Pessoas" value={peopleText} />
         <InfoItem
           icon={Phone}
           label="Telefone"
           value={entry.masked_customer_phone ?? "*****"}
         />
         <InfoItem
-          icon={Clock3}
+          icon={CalendarClock}
           label="Entrada"
-          value={formatDateTime(entry.created_at)}
+          value={formatCompactDateTime(entry.created_at)}
         />
-      </div>
+        <InfoItem icon={Clock3} label="Status" value={getCompactStatus(entry.status)} />
+      </section>
 
-      {entry.customer_name ? (
-        <div className="rounded-lg border bg-background p-4">
-          <p className="text-xs font-medium text-muted-foreground">Cliente</p>
-          <p className="mt-1 text-lg font-semibold text-foreground">
-            {entry.customer_name}
-          </p>
-        </div>
-      ) : null}
+      <p className="px-1 text-center text-xs leading-5 text-muted-foreground">
+        {viewStatus === "released"
+          ? "Compareca ao atendimento agora."
+          : "Acompanhe este link. Ele atualiza quando sua vez chegar."}
+      </p>
     </div>
   );
 }
 
-function StatusOnly({ viewStatus }: { viewStatus: CustomerViewStatus }) {
+function StatusOnly({
+  statusCopy,
+  viewStatus,
+}: {
+  statusCopy: { title: string; description: string };
+  viewStatus: CustomerViewStatus;
+}) {
   const Icon = viewStatus === "completed" ? CheckCircle2 : Clock3;
 
   return (
-    <div className="rounded-lg border bg-background p-6 text-center">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-        <Icon aria-hidden className="h-6 w-6" />
-      </div>
-      <p className="mt-4 text-sm font-medium text-muted-foreground">
-        {viewStatus === "cancelled"
-          ? "Caso queira entrar novamente, procure um atendente."
-          : viewStatus === "completed"
-            ? "Obrigado. Seu atendimento foi finalizado."
-            : "Procure um atendente caso precise de ajuda."}
-      </p>
+    <div className="space-y-3">
+      <section
+        className={cn(
+          "flex h-[172px] flex-col items-center justify-center rounded-[1.75rem] px-5 text-center",
+          viewStatus === "expired" && "bg-warning/10 text-warning",
+          viewStatus === "cancelled" && "bg-danger/10 text-danger",
+          viewStatus === "completed" && "bg-primary/10 text-primary",
+        )}
+      >
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-card shadow-sm">
+          <Icon aria-hidden className="h-6 w-6" />
+        </div>
+        <h2 className="mt-4 text-xl font-semibold tracking-normal text-foreground">
+          {statusCopy.title}
+        </h2>
+        <p className="mt-2 text-sm leading-5 text-muted-foreground">
+          {statusCopy.description}
+        </p>
+      </section>
     </div>
   );
 }
@@ -246,12 +298,14 @@ function InfoItem({
   value: string;
 }) {
   return (
-    <div className="rounded-lg border bg-background p-4">
-      <p className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground">
+    <div className="min-w-0 rounded-2xl border border-border/70 bg-background px-3 py-2.5">
+      <p className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
         <Icon aria-hidden className="h-3.5 w-3.5" />
         {label}
       </p>
-      <p className="mt-2 text-base font-semibold text-foreground">{value}</p>
+      <p className="mt-1 truncate text-sm font-semibold text-foreground">
+        {value}
+      </p>
     </div>
   );
 }
@@ -301,4 +355,40 @@ function formatRemainingTime(totalSeconds: number) {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+function getPositionText(entry: PublicCustomerQueueEntry) {
+  if (!entry.position) {
+    return "Agora";
+  }
+
+  return `${entry.position}º`;
+}
+
+function getCompanyInitial(name: string) {
+  return name.trim().charAt(0).toUpperCase() || "Q";
+}
+
+function getCompactStatus(status: PublicCustomerQueueEntry["status"]) {
+  const labels = {
+    waiting: "Na fila",
+    released: "Liberado",
+    completed: "Concluido",
+    cancelled: "Cancelado",
+  };
+
+  return labels[status];
+}
+
+function formatCompactDateTime(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return formatDateTime(value);
+  }
+
+  return date.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }

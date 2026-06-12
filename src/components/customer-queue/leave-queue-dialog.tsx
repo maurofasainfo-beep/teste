@@ -31,7 +31,7 @@ export function LeaveQueueDialog({ token, onLeft }: LeaveQueueDialogProps) {
   return (
     <>
       <Button
-        className="h-12 w-full text-base"
+        className="h-11 w-full rounded-full text-sm"
         type="button"
         variant="destructive"
         onClick={() => setOpen(true)}
