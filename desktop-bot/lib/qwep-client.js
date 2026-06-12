@@ -24,6 +24,8 @@ async function validateAuthentication(config) {
     throw new Error(body?.error ?? "Falha ao autenticar dispositivo.");
   }
 
+  ensureQwepJsonResponse(response, body);
+
   const currentState = await getRuntimeStateSafe();
   const primarySenderKnown = typeof body.is_primary_sender === "boolean";
 
@@ -158,7 +160,19 @@ async function qwepRequest(path, options) {
     throw new Error(body?.error ?? `Falha HTTP ${response.status}.`);
   }
 
+  ensureQwepJsonResponse(response, body);
+
   return body;
+}
+
+function ensureQwepJsonResponse(response, body) {
+  const contentType = response.headers.get("content-type") ?? "";
+
+  if (!contentType.toLowerCase().includes("application/json") || body?.raw) {
+    throw new Error(
+      "API QWEP indisponivel nesta URL. O servidor respondeu HTML em vez de JSON. Verifique o deploy do Next.js/Netlify e as rotas /api/extension.",
+    );
+  }
 }
 
 function normalizeHeartbeatStatus(status) {
