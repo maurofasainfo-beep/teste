@@ -1,0 +1,50 @@
+{
+  "name": "queue-saas-desktop-bot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cliente desktop QWEP para envio via WhatsApp Web no Queue SaaS.",
+  "main": "main.js",
+  "author": "Queue SaaS",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "lint": "node --check main.js && node --check preload.js && node --check renderer/app.js && node --check lib/crypto.js && node --check lib/storage.js && node --check lib/logger.js && node --check lib/qwep-client.js && node --check lib/whatsapp-bridge.js && node --check lib/message-queue.js",
+    "dist": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "^42.4.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.queuesaas.whatsappbot",
+    "productName": "Queue SaaS Bot",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "lib/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "Queue SaaS Bot Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}

@@ -73,12 +73,22 @@ export function CustomerStatusCard({
   }, [refreshEntry, token]);
 
   const viewStatus: CustomerViewStatus = useMemo(() => {
-    if (entry.status === "released" && entry.is_expired) {
+    const releasedExpiresAt = entry.expires_at
+      ? new Date(entry.expires_at).getTime()
+      : null;
+    const isReleasedExpired =
+      entry.status === "released" &&
+      (entry.is_expired ||
+        (releasedExpiresAt !== null &&
+          !Number.isNaN(releasedExpiresAt) &&
+          now >= releasedExpiresAt));
+
+    if (isReleasedExpired) {
       return "expired";
     }
 
     return entry.status;
-  }, [entry.is_expired, entry.status]);
+  }, [entry.expires_at, entry.is_expired, entry.status, now]);
 
   const remainingSeconds = useMemo(() => {
     if (viewStatus !== "released" || !entry.expires_at) return null;
@@ -87,6 +97,7 @@ export function CustomerStatusCard({
 
   const statusCopy = getStatusCopy(viewStatus, remainingSeconds);
   const showCustomerDetails = viewStatus === "waiting" || viewStatus === "released";
+  const canRefresh = viewStatus === "waiting" || viewStatus === "released";
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-[430px] items-center px-3 py-3 sm:px-4 sm:py-5">
@@ -105,23 +116,27 @@ export function CustomerStatusCard({
               Minha posicao na fila
             </h1>
             <p className="truncate text-[11px] text-muted-foreground">
-              {entry.company_trade_name}
+              {viewStatus === "expired" ? "Link expirado" : entry.company_trade_name}
             </p>
           </div>
-          <Button
-            aria-label="Atualizar"
-            className="h-9 w-9 rounded-full p-0"
-            disabled={refreshing}
-            size="icon"
-            type="button"
-            variant="ghost"
-            onClick={() => void refreshEntry()}
-          >
-            <RefreshCw
-              aria-hidden
-              className={cn("h-4 w-4", refreshing && "animate-spin")}
-            />
-          </Button>
+          {canRefresh ? (
+            <Button
+              aria-label="Atualizar"
+              className="h-9 w-9 rounded-full p-0"
+              disabled={refreshing}
+              size="icon"
+              type="button"
+              variant="ghost"
+              onClick={() => void refreshEntry()}
+            >
+              <RefreshCw
+                aria-hidden
+                className={cn("h-4 w-4", refreshing && "animate-spin")}
+              />
+            </Button>
+          ) : (
+            <div className="h-9 w-9" />
+          )}
         </header>
 
         <div className="space-y-3 px-4 pb-4">
@@ -152,18 +167,22 @@ export function CustomerStatusCard({
 
           <div className="flex items-center justify-between gap-3 border-t border-border/70 pt-3">
             <p className="text-[11px] leading-4 text-muted-foreground">
-              Telefone protegido e exibido apenas mascarado.
+              {viewStatus === "expired"
+                ? "Dados do atendimento foram ocultados apos a expiracao."
+                : "Telefone protegido e exibido apenas mascarado."}
             </p>
-            <Button
-              className="h-8 rounded-full px-3 text-[11px]"
-              disabled={refreshing}
-              size="sm"
-              type="button"
-              variant="outline"
-              onClick={() => void refreshEntry()}
-            >
-              {refreshing ? "Atualizando" : "Atualizar"}
-            </Button>
+            {canRefresh ? (
+              <Button
+                className="h-8 rounded-full px-3 text-[11px]"
+                disabled={refreshing}
+                size="sm"
+                type="button"
+                variant="outline"
+                onClick={() => void refreshEntry()}
+              >
+                {refreshing ? "Atualizando" : "Atualizar"}
+              </Button>
+            ) : null}
           </div>
         </div>
       </motion.section>
@@ -226,7 +245,7 @@ function CustomerDetails({
           </div>
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-          <span>Codigo: {entry.ticket_code}</span>
+          {entry.ticket_code ? <span>Codigo: {entry.ticket_code}</span> : null}
           <span>{entry.masked_customer_phone ?? "*****"}</span>
         </div>
       </section>
@@ -241,7 +260,7 @@ function CustomerDetails({
         <InfoItem
           icon={CalendarClock}
           label="Entrada"
-          value={formatCompactDateTime(entry.created_at)}
+          value={entry.created_at ? formatCompactDateTime(entry.created_at) : "-"}
         />
         <InfoItem icon={Clock3} label="Status" value={getCompactStatus(entry.status)} />
       </section>

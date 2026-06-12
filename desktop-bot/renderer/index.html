@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:;"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Queue SaaS Bot</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <div>
+          <div class="brand-mark">Q</div>
+          <p class="eyebrow">QWEP v1</p>
+          <h1>Queue SaaS Bot</h1>
+          <p class="muted">Cliente desktop para WhatsApp Web.</p>
+        </div>
+
+        <section class="status-card">
+          <span id="bot-status-dot" class="dot"></span>
+          <div>
+            <p class="label">Bot</p>
+            <strong id="bot-status">Parado</strong>
+          </div>
+        </section>
+
+        <section class="status-list">
+          <p><span>SaaS</span><strong id="auth-status">-</strong></p>
+          <p><span>WhatsApp</span><strong id="whatsapp-status">-</strong></p>
+          <p><span>Empresa</span><strong id="company-name">-</strong></p>
+          <p><span>Principal</span><strong id="primary-status">-</strong></p>
+        </section>
+      </aside>
+
+      <section class="content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Operacao</p>
+            <h2>Painel do bot</h2>
+          </div>
+          <div class="topbar-actions">
+            <button id="open-whatsapp" type="button" class="secondary">
+              Abrir WhatsApp
+            </button>
+            <button id="stop-bot" type="button" class="secondary danger">
+              Parar
+            </button>
+            <button id="start-bot" type="button" class="primary">
+              Iniciar bot
+            </button>
+          </div>
+        </header>
+
+        <section class="grid">
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Configuracao</p>
+                <h3>Credenciais do dispositivo</h3>
+              </div>
+              <button id="test-connection" type="button" class="secondary">
+                Testar conexao
+              </button>
+            </div>
+
+            <form id="config-form" class="form">
+              <label>
+                <span>URL do SaaS</span>
+                <input
+                  id="base-url"
+                  type="url"
+                  placeholder="http://localhost:3000"
+                  autocomplete="off"
+                  required
+                />
+              </label>
+
+              <label>
+                <span>Token do dispositivo</span>
+                <input
+                  id="token"
+                  type="password"
+                  placeholder="qwep_live_..."
+                  autocomplete="new-password"
+                />
+              </label>
+
+              <label>
+                <span>Signing Secret</span>
+                <input
+                  id="signing-secret"
+                  type="password"
+                  placeholder="qwep_sig_..."
+                  autocomplete="new-password"
+                />
+              </label>
+
+              <div class="form-row">
+                <label>
+                  <span>Polling</span>
+                  <input id="polling-interval" type="number" min="20" max="30" />
+                </label>
+                <label>
+                  <span>Delay envio ms</span>
+                  <input id="send-delay" type="number" min="5000" max="10000" />
+                </label>
+              </div>
+
+              <label class="checkbox">
+                <input id="auto-start" type="checkbox" />
+                <span>Iniciar junto com o Windows</span>
+              </label>
+
+              <div class="form-actions">
+                <button type="submit" class="primary">Salvar</button>
+                <button id="clear-config" type="button" class="secondary danger">
+                  Limpar credenciais
+                </button>
+              </div>
+              <p id="credential-hint" class="hint"></p>
+            </form>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Tempo real</p>
+                <h3>Status operacional</h3>
+              </div>
+              <button id="reset-state" type="button" class="secondary">
+                Resetar estado
+              </button>
+            </div>
+
+            <div class="metrics">
+              <div>
+                <span>Ultimo heartbeat</span>
+                <strong id="last-heartbeat">-</strong>
+              </div>
+              <div>
+                <span>Ultimo polling</span>
+                <strong id="last-polling">-</strong>
+              </div>
+              <div>
+                <span>Ultimo envio</span>
+                <strong id="last-send">-</strong>
+              </div>
+              <div>
+                <span>Processadas</span>
+                <strong id="processed-count">0</strong>
+              </div>
+              <div>
+                <span>Fila local</span>
+                <strong id="local-queue">0</strong>
+              </div>
+              <div>
+                <span>Telefone conectado</span>
+                <strong id="connected-phone">-</strong>
+              </div>
+            </div>
+
+            <div id="last-error-box" class="error-box hidden">
+              <span>Ultimo erro</span>
+              <strong id="last-error">-</strong>
+            </div>
+          </article>
+        </section>
+
+        <article class="panel logs-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Logs locais</p>
+              <h3>Eventos recentes</h3>
+            </div>
+            <button id="refresh-status" type="button" class="secondary">
+              Atualizar status
+            </button>
+          </div>
+          <div id="logs" class="logs"></div>
+        </article>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

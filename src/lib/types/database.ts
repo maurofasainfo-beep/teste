@@ -83,13 +83,13 @@ export type PublicCustomerQueueEntry = {
   id: string;
   customer_name: string | null;
   masked_customer_phone: string | null;
-  ticket_code: string;
+  ticket_code: string | null;
   status: QueueEntryStatus;
   position: number | null;
   party_size: number | null;
   company_trade_name: string;
   public_queue_slug: string;
-  created_at: string;
+  created_at: string | null;
   released_at: string | null;
   cancelled_at: string | null;
   completed_at: string | null;
