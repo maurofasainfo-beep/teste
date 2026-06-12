@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Configuracao QWEP</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header>
+        <p class="eyebrow">Queue SaaS</p>
+        <h1>Configuracao da extensao WhatsApp</h1>
+        <p class="description">
+          Informe a URL do SaaS e as credenciais do dispositivo criadas em
+          Configuracoes &gt; WhatsApp.
+        </p>
+      </header>
+
+      <form id="config-form" class="panel">
+        <label>
+          <span>URL do SaaS</span>
+          <input
+            id="base-url"
+            type="url"
+            placeholder="http://localhost:3000"
+            autocomplete="off"
+            required
+          />
+        </label>
+
+        <label>
+          <span>Token do dispositivo</span>
+          <input
+            id="token"
+            type="password"
+            placeholder="Cole o token exibido uma unica vez"
+            autocomplete="off"
+          />
+          <small>Deixe em branco para manter o token salvo.</small>
+        </label>
+
+        <label>
+          <span>Signing Secret</span>
+          <input
+            id="signing-secret"
+            type="password"
+            placeholder="Cole o signing secret exibido uma unica vez"
+            autocomplete="off"
+          />
+          <small>Deixe em branco para manter o segredo salvo.</small>
+        </label>
+
+        <div class="grid">
+          <label>
+            <span>Polling automatico</span>
+            <input id="polling-interval" type="number" min="20" max="30" />
+            <small>Segundos. A extensao processa no maximo uma mensagem por ciclo.</small>
+          </label>
+
+          <label>
+            <span>Delay entre envios</span>
+            <input id="send-delay" type="number" min="3000" max="60000" />
+            <small>Milissegundos.</small>
+          </label>
+        </div>
+
+        <div id="status-message" class="status-message" role="status"></div>
+
+        <div class="actions">
+          <button type="submit" class="primary">Salvar e testar</button>
+          <button id="test-connection" type="button">Testar conexao</button>
+          <button id="clear-config" type="button" class="danger">
+            Limpar credenciais
+          </button>
+        </div>
+      </form>
+
+      <section class="panel">
+        <h2>Status atual</h2>
+        <dl class="status-list">
+          <div>
+            <dt>Autenticacao</dt>
+            <dd id="auth-status">-</dd>
+          </div>
+          <div>
+            <dt>Empresa</dt>
+            <dd id="company-name">-</dd>
+          </div>
+          <div>
+            <dt>Dispositivo</dt>
+            <dd id="device-status">-</dd>
+          </div>
+          <div>
+            <dt>WhatsApp</dt>
+            <dd id="whatsapp-status">-</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="panel">
+        <h2>Logs locais seguros</h2>
+        <ul id="local-logs" class="logs"></ul>
+      </section>
+    </main>
+
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

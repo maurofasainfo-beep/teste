@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Queue WhatsApp</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup-shell">
+      <header class="header">
+        <div>
+          <p class="eyebrow">QWEP v1</p>
+          <h1>WhatsApp Connector</h1>
+        </div>
+        <span id="auth-status" class="badge neutral">Nao configurado</span>
+      </header>
+
+      <section class="company">
+        <span class="label">Empresa</span>
+        <strong id="company-name">-</strong>
+      </section>
+
+      <section class="status-grid">
+        <article>
+          <span class="label">Dispositivo</span>
+          <strong id="device-status">-</strong>
+        </article>
+        <article>
+          <span class="label">WhatsApp</span>
+          <strong id="whatsapp-status">-</strong>
+        </article>
+        <article>
+          <span class="label">Telefone</span>
+          <strong id="connected-phone">-</strong>
+        </article>
+        <article>
+          <span class="label">Fila local</span>
+          <strong id="local-queue-size">0</strong>
+        </article>
+      </section>
+
+      <section class="timeline">
+        <p><span>Heartbeat</span><strong id="last-heartbeat">-</strong></p>
+        <p><span>Polling</span><strong id="last-polling">-</strong></p>
+        <p><span>Ultimo envio</span><strong id="last-send">-</strong></p>
+      </section>
+
+      <section id="last-error-panel" class="error-panel" hidden>
+        <span class="label">Ultimo erro</span>
+        <p id="last-error"></p>
+      </section>
+
+      <section class="actions">
+        <button id="open-whatsapp" type="button" class="primary">
+          Abrir WhatsApp Web
+        </button>
+        <button id="test-connection" type="button">Testar conexao</button>
+        <button id="process-next" type="button">Processar próxima mensagem</button>
+        <button id="reset-state" type="button">Resetar estado da extensão</button>
+        <button id="open-options" type="button" class="ghost">Configuracoes</button>
+      </section>
+
+      <footer>
+        <span id="primary-sender">Emissor principal: -</span>
+      </footer>
+    </main>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

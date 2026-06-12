@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Queue SaaS WhatsApp Connector",
+  "description": "Conector QWEP v1 para envio operacional via WhatsApp Web.",
+  "version": "0.1.0",
+  "action": {
+    "default_title": "Queue WhatsApp",
+    "default_popup": "src/popup/popup.html"
+  },
+  "options_page": "src/options/options.html",
+  "background": {
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
+  },
+  "permissions": ["alarms", "scripting", "storage", "tabs"],
+  "host_permissions": [
+    "https://web.whatsapp.com/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ],
+  "optional_host_permissions": ["https://*/*"]
+}
