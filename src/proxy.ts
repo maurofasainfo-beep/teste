@@ -4,6 +4,7 @@ import { getSupabasePublicConfig, isSupabaseConfigured } from "@/lib/env";
 import type { Database } from "@/lib/types/database";
 
 const publicPrefixes = [
+  "/api/extension",
   "/login",
   "/auth",
   "/display",
