@@ -1,20 +1,21 @@
-# Queue SaaS
+# FasaWait
 
-SaaS multiempresa para gerenciamento de filas, construído com Next.js, TypeScript, Tailwind, componentes no padrão Shadcn UI e Supabase.
+SaaS multiempresa para gerenciamento de filas, construido com Next.js, TypeScript, Tailwind, componentes no padrao Shadcn UI e Supabase.
 
-## O que foi criado
+## O que esta incluido
 
-- Autenticação com Supabase Auth.
+- Autenticacao com Supabase Auth.
 - Multi-tenancy por `company_id`.
 - RLS completo no PostgreSQL.
 - Painel operacional em tempo real.
-- Display público em `/display/{slug}`.
-- Templates e eventos de mensagens preparados para Evolution API.
-- Provider inicial `NoopMessageProvider`, que registra eventos sem enviar mensagens reais.
+- Display publico em `/display/{slug}`.
+- Templates e eventos de mensagens por empresa.
+- QWEP para FasaWait Bot e extensao WhatsApp.
+- Desktop Bot Electron com heartbeat, polling e ACK.
 
 ## Rodar localmente
 
-1. Instale dependências:
+1. Instale dependencias:
 
 ```bash
 npm install
@@ -45,18 +46,19 @@ npm run build
 npm run dev
 ```
 
-## Documentação
+## Documentacao
 
+- `PROJECT_FULL_DOCUMENTATION.md`
 - `ARQUITETURA.md`
 - `BANCO_DE_DADOS.md`
 - `FLUXOS.md`
 - `PERMISSOES.md`
 - `SUPABASE_SETUP.md`
 - `DEPLOY.md`
-- `EVOLUTION_API_FUTURA.md`
 - `VALIDACAO.md`
+- `WHATSAPP_DEVICE_SETUP.md`
 
-## Documentacao do link individual
+## Link individual
 
 - `CUSTOMER_QUEUE_LINK.md`
 - `NOTIFICATION_FLOW.md`

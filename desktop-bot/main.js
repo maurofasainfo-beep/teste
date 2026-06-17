@@ -36,7 +36,9 @@ const {
 } = require("./lib/whatsapp-bridge");
 
 const TRAY_ICON =
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACRSURBVDhPY+Avy/tPCR7OBvgcePUfBbze898HizqsBpRfA+l49X/eBJhY1/95r7EbgmnAhD3/HwDVPjjQRZQ4hgEwpx9YiSrOX7bk/wGQxLUlKOI4DEB2Pgxj9wbpLiBkALpfwQaCnL3yMkg7YS+AMGosQG0GA0yvYTUAhDHSARiQYABWDPIGwTAgEVNoQN5/AKw4Q6SQ5pftAAAAAElFTkSuQmCC";
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAHKSURBVFhH7VehUsNAEI1EIpFIJLLugC9A1oEqCQYksg7DDJ+ArERW8AF8QEXlTTIDDIpBRYa3uaXlcpvkrrk43swTbXb37d3tbTbJP3aFutbH6kqfbIjf/GgcqAu9B6HL0yxfgCVYiUzzZ5XpVN3ofXYdDgqIwB+iYBvT/Eul+pYS5zDhoFUg2KsTPIxr7Nwhh/QHOcFZN4LtRtoN1AmH7gevPI74LymJmT5iiXbQmcFh6La3UfcWJxWO4GjxYVXJ+PyuMsHeZvHIUi7q1XtU+7AE8hI944AlbdTXTXayuEnAT9DhWVbcs6QNrH4pOTQ5NAFwzZJbcOW3d7g/jJBA5dwIFN9EMpTYVgNvL++ivUQc9zlLG9AfkqHEKAngtrG0gW8BEmMcAThnaQNkNBWMREapgVTfsbQB9WrJUGKkBKYsbUDNQTKUGCmBCUtvgQdjvQNsotuypA08nDvGo7B4YkkbfAxezWgIO+dHeltJTtGImZGlZNS7EDr/+bP0G0pMW45+FM7V6wIZwylmEnbn80HdnDDLCcFCWAatvAm+GfQxIgXvJn2k+Jy5D+jq0P3tLVCzY4ugMTwUVKQgDa/UuGrS71FFx0GS/AAUOpxEZFP3TQAAAABJRU5ErkJggg==";
+
+const APP_ICON_PATH = path.join(__dirname, "assets", "icon.ico");
 
 let mainWindow = null;
 let whatsappWindow = null;
@@ -58,6 +60,10 @@ if (!gotLock) {
 app.whenReady().then(async () => {
   configureStorage({
     dataDir: app.getPath("userData"),
+    legacyDataDirs: [
+      path.join(app.getPath("appData"), "Queue SaaS Bot"),
+      path.join(app.getPath("appData"), "queue-saas-desktop-bot"),
+    ],
     safeStorage,
   });
 
@@ -98,8 +104,9 @@ function createMainWindow() {
     height: 760,
     minWidth: 920,
     minHeight: 640,
-    title: "Queue SaaS Bot",
-    backgroundColor: "#f8fafc",
+    title: "FasaWait Bot",
+    icon: APP_ICON_PATH,
+    backgroundColor: "#f7f9fc",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -145,7 +152,8 @@ async function getOrCreateWhatsAppWindow({ createIfMissing = false, show = false
     width: 1180,
     height: 820,
     show,
-    title: "WhatsApp Web - Queue SaaS Bot",
+    title: "WhatsApp Web - FasaWait Bot",
+    icon: APP_ICON_PATH,
     backgroundColor: "#111b21",
     webPreferences: {
       contextIsolation: true,
@@ -177,7 +185,7 @@ function buildChromeUserAgent() {
 function createTray() {
   const image = nativeImage.createFromDataURL(TRAY_ICON);
   tray = new Tray(image);
-  tray.setToolTip("Queue SaaS Bot");
+  tray.setToolTip("FasaWait Bot");
   updateTrayMenu();
   tray.on("click", showMainWindow);
 }

@@ -1,7 +1,8 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const STORE_FILE = "queue-saas-bot-state.json";
+const STORE_FILE = "fasawait-bot-state.json";
+const LEGACY_STORE_FILES = ["queue-saas-bot-state.json"];
 
 const DEFAULT_STATE = {
   authStatus: "not_configured",
@@ -32,10 +33,11 @@ const DEFAULT_STATE = {
 let storageFilePath = "";
 let electronSafeStorage = null;
 
-function configureStorage({ dataDir, safeStorage }) {
+function configureStorage({ dataDir, legacyDataDirs = [], safeStorage }) {
   storageFilePath = path.join(dataDir, STORE_FILE);
   electronSafeStorage = safeStorage;
   fs.mkdirSync(path.dirname(storageFilePath), { recursive: true });
+  migrateLegacyStore([dataDir, ...legacyDataDirs]);
   ensureStore();
 }
 
@@ -50,6 +52,31 @@ function ensureStore() {
 
   if (!fs.existsSync(storageFilePath)) {
     writeStore({ config: null, state: DEFAULT_STATE, logs: [] });
+  }
+}
+
+function migrateLegacyStore(legacyDataDirs) {
+  ensureConfigured();
+
+  if (fs.existsSync(storageFilePath)) {
+    return;
+  }
+
+  for (const legacyDataDir of legacyDataDirs) {
+    for (const legacyFile of LEGACY_STORE_FILES) {
+      const legacyPath = path.join(legacyDataDir, legacyFile);
+
+      if (!fs.existsSync(legacyPath)) {
+        continue;
+      }
+
+      try {
+        fs.copyFileSync(legacyPath, storageFilePath);
+        return;
+      } catch {
+        return;
+      }
+    }
   }
 }
 

@@ -1,10 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "Queue SaaS WhatsApp Connector",
+  "name": "FasaWait WhatsApp Connector",
   "description": "Conector QWEP v1 para envio operacional via WhatsApp Web.",
   "version": "0.1.0",
   "action": {
-    "default_title": "Queue WhatsApp",
+    "default_title": "FasaWait WhatsApp",
     "default_popup": "src/popup/popup.html"
   },
   "options_page": "src/options/options.html",

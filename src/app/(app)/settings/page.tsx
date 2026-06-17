@@ -41,8 +41,8 @@ const sections = [
     icon: TimerReset,
   },
   {
-    title: "Integracoes futuras",
-    description: "Preparado para Evolution API no servidor.",
+    title: "Integracoes",
+    description: "Canais e provedores de mensageria.",
     icon: PlugZap,
   },
 ];
@@ -132,27 +132,6 @@ export default async function SettingsPage() {
             </div>
           </section>
 
-          <section className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
-            <div className="flex items-start gap-4">
-              <div className="rounded-lg bg-primary/10 p-3 text-primary">
-                <PlugZap aria-hidden className="h-5 w-5" />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-foreground">
-                  Evolution API
-                </h2>
-                <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-                  O provider atual registra eventos com provider{" "}
-                  <code className="rounded bg-secondary px-1.5 py-0.5 font-mono">
-                    none
-                  </code>
-                  . Tokens futuros devem permanecer no servidor ou em storage
-                  protegido por service role.
-                </p>
-              </div>
-            </div>
-          </section>
-
           <WhatsAppDevicesPanel
             devices={whatsappDevices ?? []}
             logs={whatsappLogs ?? []}
@@ -219,7 +198,7 @@ export default async function SettingsPage() {
             <div className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
               <h2 className="text-base font-semibold text-foreground">Mensageria</h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                Eventos preparados para envio futuro por WhatsApp.
+                Eventos registrados para envio por WhatsApp.
               </p>
             </div>
           </section>

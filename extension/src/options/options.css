@@ -28,7 +28,7 @@ header {
 
 .eyebrow {
   margin: 0 0 6px;
-  color: #0f766e;
+  color: #27408b;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0;
@@ -99,8 +99,8 @@ input {
 }
 
 input:focus {
-  border-color: #0f766e;
-  outline: 3px solid rgba(15, 118, 110, 0.18);
+  border-color: #4169e1;
+  outline: 3px solid rgba(65, 105, 225, 0.18);
 }
 
 .grid {
@@ -129,8 +129,8 @@ button {
 }
 
 button.primary {
-  border-color: #0f766e;
-  background: #0f766e;
+  border-color: #4169e1;
+  background: #4169e1;
   color: #ffffff;
 }
 
@@ -140,11 +140,11 @@ button.danger {
 }
 
 button:hover {
-  border-color: #0f766e;
+  border-color: #4169e1;
 }
 
 button:focus-visible {
-  outline: 3px solid rgba(15, 118, 110, 0.22);
+  outline: 3px solid rgba(65, 105, 225, 0.22);
   outline-offset: 2px;
 }
 
@@ -156,7 +156,7 @@ button:focus-visible {
 }
 
 .status-message.ok {
-  color: #0f766e;
+  color: #16a34a;
 }
 
 .status-message.error {

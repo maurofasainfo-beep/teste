@@ -16,7 +16,7 @@ Esse link nao exige login e mostra apenas os dados daquele cliente.
 2. `queue_entries` recebe `party_size` e `public_customer_token`.
 3. A aplicacao monta o link com `NEXT_PUBLIC_APP_URL`.
 4. O painel operacional mostra a senha, o link individual e os botoes Copiar link e Abrir link.
-5. Futuramente o bot WhatsApp enviara esse link.
+5. O FasaWait Bot ou a extensao WhatsApp pode enviar esse link quando o canal WhatsApp esta ativo.
 
 ## Seguranca
 

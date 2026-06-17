@@ -151,19 +151,17 @@ function render(snapshot) {
   elements.sendDelay.value = String(config?.sendDelayMs ?? 5000);
   elements.autoStart.checked = Boolean(config?.autoStart);
   elements.credentialHint.textContent = config
-    ? `Credenciais: token ${config.hasToken ? "salvo" : "ausente"}, signing secret ${
-        config.hasSigningSecret ? "salvo" : "ausente"
-      }. Armazenamento: ${config.credentialStorage ?? "local"}.`
-    : "Nenhuma credencial salva.";
+    ? getCredentialHint(config)
+    : "Informe URL, token e signing secret para iniciar.";
 
   elements.authStatus.textContent = formatAuthStatus(state.authStatus);
   elements.whatsappStatus.textContent = formatWhatsAppStatus(state.whatsappStatus);
   elements.companyName.textContent = state.companyName || "-";
   elements.primaryStatus.textContent = state.primarySenderKnown
     ? state.isPrimarySender
-      ? "Sim"
-      : "Nao"
-    : "Nao informado";
+      ? "Principal"
+      : "Nao principal"
+    : "Aguardando";
   elements.connectedPhone.textContent = maskPhone(state.connectedPhone);
   elements.lastHeartbeat.textContent = formatRelativeDate(state.lastHeartbeatAt);
   elements.lastHeartbeat.title = formatDate(state.lastHeartbeatAt);
@@ -173,7 +171,7 @@ function render(snapshot) {
   elements.lastSend.title = formatDate(state.lastSendAt);
   elements.processedCount.textContent = String(state.processedCount ?? 0);
   elements.localQueue.textContent = String(state.localQueueSize ?? 0);
-  elements.botStatus.textContent = state.botRunning ? "Rodando" : "Parado";
+  elements.botStatus.textContent = state.botRunning ? "Rodando" : "Pausado";
   elements.botStatusDot.classList.toggle("on", Boolean(state.botRunning));
   elements.heartbeatHealth.textContent = getHeartbeatHealthLabel(state.lastHeartbeatAt);
 
@@ -222,7 +220,8 @@ function renderLogs(logs) {
     const at = document.createElement("span");
     at.className = "log-time";
     eventName.textContent = humanizeEvent(log.event);
-    at.textContent = formatDate(log.at);
+    at.textContent = formatTime(log.at);
+    at.title = formatDate(log.at);
     header.append(eventName, at);
 
     const badge = document.createElement("span");
@@ -239,6 +238,20 @@ function renderLogs(logs) {
   }
 }
 
+function getCredentialHint(config) {
+  const hasCredentials = Boolean(config.hasToken && config.hasSigningSecret);
+
+  if (!hasCredentials) {
+    return "Credenciais incompletas. Cole o token e o signing secret do dispositivo.";
+  }
+
+  if (config.credentialStorage === "safeStorage") {
+    return "Credenciais salvas e protegidas neste computador.";
+  }
+
+  return "Credenciais salvas neste computador.";
+}
+
 function formatDate(value) {
   if (!value) {
     return "-";
@@ -251,6 +264,23 @@ function formatDate(value) {
   }
 
   return date.toLocaleString("pt-BR");
+}
+
+function formatTime(value) {
+  if (!value) {
+    return "-";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
+
+  return date.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function formatRelativeDate(value) {
@@ -438,6 +468,14 @@ function formatAuthStatus(status) {
     return "Erro";
   }
 
+  if (value === "authenticating") {
+    return "Validando";
+  }
+
+  if (value === "not_configured") {
+    return "Nao configurado";
+  }
+
   if (!value || value === "undefined") {
     return "-";
   }
@@ -492,7 +530,7 @@ function normalizeLogLevel(level, eventName) {
 
 function getLevelLabel(level) {
   if (level === "success") {
-    return "sucesso";
+    return "ok";
   }
 
   if (level === "error") {
@@ -508,6 +546,32 @@ function getLevelLabel(level) {
 
 function humanizeEvent(eventName) {
   const value = String(eventName ?? "event");
+  const labels = {
+    ack_failed: "ACK nao confirmado",
+    auth_failed: "Conexao recusada",
+    auth_ok: "Conexao validada",
+    background_error: "Erro em segundo plano",
+    bot_started: "Bot iniciado",
+    bot_stopped: "Bot pausado",
+    heartbeat_failed: "Heartbeat falhou",
+    message_already_sent: "Mensagem ja confirmada",
+    message_failed_ack: "Falha registrada",
+    message_invalid: "Mensagem invalida",
+    message_lock_busy: "Mensagem em processamento",
+    message_lock_expired: "Bloqueio local liberado",
+    message_lock_timeout: "Tempo de processamento excedido",
+    message_sent: "Mensagem enviada",
+    polling_failed: "Polling falhou",
+    polling_ok: "Mensagem reservada",
+    primary_sender_required: "Dispositivo nao principal",
+    sent_ack_failed: "Confirmacao falhou",
+    startup_failed: "Inicializacao falhou",
+    state_reset: "Estado resetado",
+  };
+
+  if (labels[value]) {
+    return labels[value];
+  }
 
   return value
     .replace(/[_-]+/g, " ")

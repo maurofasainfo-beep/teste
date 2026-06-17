@@ -1,6 +1,6 @@
 # PROJECT_FULL_DOCUMENTATION.md
 
-Documentacao completa e atualizada do projeto Queue SaaS, gerada a partir do estado atual do repositorio `C:\Users\User\queue-saas`.
+Documentacao completa e atualizada do projeto FasaWait, gerada a partir do estado atual do repositorio `C:\Users\User\queue-saas`.
 
 ## Indice
 
@@ -32,7 +32,7 @@ Documentacao completa e atualizada do projeto Queue SaaS, gerada a partir do est
 
 ## 1. Resumo Executivo
 
-O Queue SaaS e um sistema SaaS multiempresa para gerenciamento de filas de atendimento. O produto permite que empresas clientes cadastrem pessoas em uma fila, chamem/liberem clientes, exibam a fila em um display publico e enviem notificacoes por WhatsApp Web por meio de infraestrutura QWEP e bot desktop/Chrome.
+O FasaWait e um sistema SaaS multiempresa para gerenciamento de filas de atendimento. O produto permite que empresas clientes cadastrem pessoas em uma fila, chamem/liberem clientes, exibam a fila em um display publico e enviem notificacoes por WhatsApp Web por meio de infraestrutura QWEP e bot desktop/Chrome.
 
 Objetivo principal:
 
@@ -64,7 +64,7 @@ Estagio atual: **Beta tecnico / producao parcial**.
 Justificativa:
 
 - O SaaS principal esta funcional: login, tenants, fila, display publico, templates, link individual, painel operacional, configuracoes e administracao da plataforma existem no codigo.
-- O banco possui migracoes estruturadas ate `024`, RLS, RPCs publicas limitadas, indices e suporte QWEP.
+- O banco possui migracoes estruturadas ate `025`, RLS, RPCs publicas limitadas, indices e suporte QWEP.
 - Existe Desktop Bot Electron com build `.exe`, system tray, armazenamento local e fluxo QWEP.
 - Existe extensao Chrome Manifest V3 ainda mantida no repositorio.
 - O envio por WhatsApp Web depende de APIs internas do WhatsApp Web, o que torna a camada de envio sensivel a mudancas externas.
@@ -293,6 +293,7 @@ Arquivos de documentacao existentes:
 | `022_create_whatsapp_device_rls_policies.sql` | RLS para dispositivos/logs |
 | `023_create_whatsapp_indexes.sql` | Indices QWEP/dispositivos |
 | `024_update_public_customer_link_expiration.sql` | Oculta dados sensiveis apos expiracao/finalizacao |
+| `025_harden_whatsapp_device_rpc.sql` | Restringe a RPC de dispositivo principal e remove grants publicos |
 | `999_cleanup_operational_test_data.sql` | Limpa apenas dados operacionais de teste |
 
 ### 6.2 Tabelas
@@ -1369,7 +1370,7 @@ npm run dist
 Saida:
 
 ```text
-desktop-bot/dist/Queue SaaS Bot Setup.exe
+desktop-bot/dist/FasaWait Bot Setup.exe
 ```
 
 ### Limitacoes
@@ -1393,7 +1394,7 @@ extension/
 Manifest:
 
 - Manifest V3.
-- Nome: `Queue SaaS WhatsApp Connector`.
+- Nome: `FasaWait WhatsApp Connector`.
 - Permissoes: `alarms`, `scripting`, `storage`, `tabs`.
 - Host permissions: `https://web.whatsapp.com/*`, localhost/127.0.0.1.
 - Permissoes opcionais para `https://*/*`.
@@ -1721,7 +1722,7 @@ npm run dist
 Saida:
 
 ```text
-desktop-bot/dist/Queue SaaS Bot Setup.exe
+desktop-bot/dist/FasaWait Bot Setup.exe
 ```
 
 ### Extensao Chrome
@@ -1955,7 +1956,7 @@ Preserva:
 
 ## 23. Conclusao
 
-O Queue SaaS esta em um estado avancado de MVP/beta tecnico. O sistema web tem arquitetura multi-tenant consistente, banco com RLS, rotas protegidas, paginas publicas limitadas por RPC, templates por empresa, notificacoes desacopladas e backend QWEP completo para automacao WhatsApp.
+O FasaWait esta em um estado avancado de MVP/beta tecnico. O sistema web tem arquitetura multi-tenant consistente, banco com RLS, rotas protegidas, paginas publicas limitadas por RPC, templates por empresa, notificacoes desacopladas e backend QWEP completo para automacao WhatsApp.
 
 O Desktop Bot Electron e a extensao Chrome tornam o projeto capaz de consumir eventos `message_events.pending` e tentar envio por WhatsApp Web com HMAC, reserva, ACK e protecao contra duplicidade. Ainda assim, a automacao por WhatsApp Web deve ser tratada como componente sensivel e instavel, porque depende de APIs internas fora do controle do projeto.
 

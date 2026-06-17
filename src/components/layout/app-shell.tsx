@@ -15,7 +15,7 @@ export function AppShell({ company, profile, children }: AppShellProps) {
       status={company.status}
       userEmail={profile.email}
       userName={profile.name}
-      workspaceLabel="Queue SaaS"
+      workspaceLabel="FasaWait"
       workspaceName={company.trade_name}
     >
       {children}

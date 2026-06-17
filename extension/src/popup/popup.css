@@ -3,7 +3,7 @@
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
-  background: #f8fafc;
+  background: #f7f9fc;
   color: #0f172a;
 }
 
@@ -14,7 +14,7 @@
 body {
   width: 380px;
   margin: 0;
-  background: #f8fafc;
+  background: #f7f9fc;
 }
 
 .popup-shell {
@@ -50,7 +50,7 @@ h1 {
   align-items: center;
   min-height: 24px;
   border-radius: 999px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e5eaf2;
   padding: 3px 8px;
   background: #ffffff;
   color: #64748b;
@@ -60,9 +60,9 @@ h1 {
 }
 
 .badge.ok {
-  border-color: #99f6e4;
-  background: #ccfbf1;
-  color: #0f766e;
+  border-color: #bbf7d0;
+  background: #ecfdf3;
+  color: #15803d;
 }
 
 .badge.error {
@@ -75,7 +75,7 @@ h1 {
 .status-grid article,
 .timeline,
 .error-panel {
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e5eaf2;
   border-radius: 8px;
   background: #ffffff;
 }
@@ -163,24 +163,24 @@ button {
 }
 
 button:hover {
-  border-color: #0f766e;
+  border-color: #4169e1;
 }
 
 button:focus-visible {
-  outline: 3px solid rgba(15, 118, 110, 0.25);
+  outline: 3px solid rgba(65, 105, 225, 0.25);
   outline-offset: 2px;
 }
 
 button.primary {
-  border-color: #0f766e;
-  background: #0f766e;
+  border-color: #4169e1;
+  background: #4169e1;
   color: #ffffff;
 }
 
 button.ghost {
   border-color: transparent;
   background: transparent;
-  color: #0f766e;
+  color: #27408b;
 }
 
 footer {

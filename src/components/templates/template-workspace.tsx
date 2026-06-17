@@ -122,7 +122,7 @@ export function TemplateWorkspace({
               Variaveis disponiveis
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Marcadores aceitos nos envios futuros.
+              Marcadores aceitos nas mensagens automaticas.
             </p>
           </div>
         </div>

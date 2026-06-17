@@ -2,11 +2,11 @@
 
 ## Objetivo
 
-Explicar como criar e testar um dispositivo WhatsApp Web sem extensao real.
+Explicar como criar e testar um dispositivo WhatsApp Web para o FasaWait Bot ou para a extensao.
 
 ## Criar dispositivo
 
-1. Acesse o SaaS como admin da empresa.
+1. Acesse o FasaWait como admin da empresa.
 2. Abra `Configuracoes`.
 3. Va ate a secao `WhatsApp`.
 4. Informe o nome do dispositivo.
@@ -33,7 +33,7 @@ No painel:
 3. O token deixa de autenticar.
 4. Reservas abertas sao liberadas para retry.
 
-## Teste sem extensao
+## Teste via API
 
 Use Postman, Insomnia ou cURL.
 
@@ -68,4 +68,3 @@ X-QWEP-Nonce: {random}
 X-QWEP-Body-SHA256: {sha256_body}
 X-QWEP-Signature: {hmac_sha256}
 ```
-

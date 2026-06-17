@@ -194,7 +194,7 @@ function clampPollingInterval(value) {
 }
 
 function buildUserAgent() {
-  return `Queue SaaS Bot/${app.getVersion()} Electron/${process.versions.electron} Chrome/${process.versions.chrome}`;
+  return `FasaWait Bot/${app.getVersion()} Electron/${process.versions.electron} Chrome/${process.versions.chrome}`;
 }
 
 async function parseJson(response) {

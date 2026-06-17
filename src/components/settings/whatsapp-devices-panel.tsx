@@ -62,8 +62,8 @@ export function WhatsAppDevicesPanel({
           <div>
             <h2 className="text-base font-semibold text-foreground">WhatsApp</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-              Infraestrutura backend QWEP para futura extensao WhatsApp Web.
-              O envio real ainda nao acontece aqui.
+              Conecte o FasaWait Bot ou a extensao WhatsApp para enviar mensagens
+              pelos dispositivos autorizados desta empresa.
             </p>
           </div>
         </div>
@@ -82,12 +82,6 @@ export function WhatsAppDevicesPanel({
               <option value="none">Nenhum</option>
               <option value="simulated">Simulado</option>
               <option value="whatsapp_extension">Extensao WhatsApp</option>
-              <option disabled value="evolution_api">
-                Evolution API futura
-              </option>
-              <option disabled value="sms">
-                SMS futuro
-              </option>
             </Select>
           </div>
           <SubmitButton className="mt-4 w-full" icon={ShieldCheck} label="Salvar canal" />
@@ -148,7 +142,7 @@ export function WhatsAppDevicesPanel({
                 className="min-h-64"
                 icon={RadioTower}
                 title="Nenhum dispositivo"
-                description="Crie um dispositivo para preparar a futura extensao."
+                description="Crie um dispositivo para conectar o FasaWait Bot."
               />
             ) : null}
           </div>
@@ -220,7 +214,7 @@ function DeviceCard({ device }: { device: WhatsAppDevice }) {
           <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
             <span>Ultimo heartbeat: {device.last_seen_at ? formatDateTime(device.last_seen_at) : "Nunca"}</span>
             <span>Telefone: {device.connected_phone ? maskPhone(device.connected_phone) : "Nao conectado"}</span>
-            <span>Extensao: {device.extension_version ?? "Nao informada"}</span>
+            <span>Versao: {device.extension_version ?? "Nao informada"}</span>
             <span>Navegador: {device.browser_name ?? "Nao informado"}</span>
           </div>
         </div>
@@ -268,4 +262,3 @@ function SubmitButton({
     </Button>
   );
 }
-

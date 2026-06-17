@@ -37,7 +37,7 @@ export default async function TemplatesPage() {
     <>
       <PageHeader
         title="Templates"
-        description="Modelos preparados para mensageria futura."
+        description="Modelos usados nas mensagens automaticas."
         action={<StatusBadge status={company.status} />}
       />
       <TemplateWorkspace templateTypes={templateTypes} templates={templates ?? []} />

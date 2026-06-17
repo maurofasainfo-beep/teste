@@ -1,6 +1,6 @@
-# Queue SaaS WhatsApp Connector
+# FasaWait WhatsApp Connector
 
-Extensao Chrome Manifest V3 para consumir eventos QWEP v1 do SaaS de filas e enviar mensagens pelo WhatsApp Web.
+Extensao Chrome Manifest V3 para consumir eventos QWEP v1 do FasaWait e enviar mensagens pelo WhatsApp Web.
 
 ## O que esta incluido
 
@@ -9,7 +9,7 @@ Extensao Chrome Manifest V3 para consumir eventos QWEP v1 do SaaS de filas e env
 - Heartbeat em `POST /api/extension/status/heartbeat`.
 - Polling automatico de uma mensagem por ciclo em `GET /api/extension/messages/pending`.
 - ACK em `POST /api/extension/messages/:id/ack`.
-- Envio MVP pelo WhatsApp Web sem recarregar a aba quando o dispositivo esta autenticado, primary e conectado.
+- Envio pelo WhatsApp Web sem recarregar a aba quando o dispositivo esta autenticado, primary e conectado.
 
 ## Como instalar no Chrome
 
@@ -21,7 +21,7 @@ Extensao Chrome Manifest V3 para consumir eventos QWEP v1 do SaaS de filas e env
 
 ## Como configurar
 
-1. No SaaS, acesse `Configuracoes > WhatsApp`.
+1. No FasaWait, acesse `Configuracoes > WhatsApp`.
 2. Crie um dispositivo.
 3. Copie o token e o signing secret exibidos uma unica vez.
 4. Abra as opcoes da extensao.
@@ -35,9 +35,9 @@ Extensao Chrome Manifest V3 para consumir eventos QWEP v1 do SaaS de filas e env
 
 1. Abra o popup da extensao.
 2. Clique em `Abrir WhatsApp Web`.
-3. Faça login no WhatsApp Web, se necessario.
+3. Faca login no WhatsApp Web, se necessario.
 4. Confirme no popup que o status do WhatsApp esta `connected`.
-5. No SaaS, selecione o canal `Extensao WhatsApp`.
+5. No FasaWait, selecione o canal `Extensao WhatsApp`.
 6. Cadastre um cliente na fila.
 7. Aguarde o polling automatico.
 8. A extensao buscara um unico evento por ciclo, enviara uma unica mensagem e confirmara o ACK.
@@ -69,7 +69,7 @@ nonce
 body_sha256
 ```
 
-## Limitacoes do MVP
+## Limitacoes
 
 - O envio depende da interface atual do WhatsApp Web.
 - O ACK `sent` significa que o WhatsApp Web aceitou a chamada interna de envio, nao que o WhatsApp confirmou entrega ao destinatario.

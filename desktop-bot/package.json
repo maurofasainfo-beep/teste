@@ -1,10 +1,11 @@
 {
-  "name": "queue-saas-desktop-bot",
+  "name": "fasawait-bot",
   "version": "0.1.0",
   "private": true,
-  "description": "Cliente desktop QWEP para envio via WhatsApp Web no Queue SaaS.",
+  "productName": "FasaWait Bot",
+  "description": "Cliente desktop QWEP para envio via WhatsApp Web no FasaWait.",
   "main": "main.js",
-  "author": "Queue SaaS",
+  "author": "FasaWait",
   "license": "UNLICENSED",
   "scripts": {
     "start": "electron .",
@@ -17,11 +18,12 @@
   },
   "build": {
     "appId": "com.queuesaas.whatsappbot",
-    "productName": "Queue SaaS Bot",
+    "productName": "FasaWait Bot",
     "directories": {
       "output": "dist"
     },
     "files": [
+      "assets/**/*",
       "main.js",
       "preload.js",
       "renderer/**/*",
@@ -29,6 +31,7 @@
       "package.json"
     ],
     "win": {
+      "icon": "assets/icon.ico",
       "target": [
         {
           "target": "nsis",
@@ -37,7 +40,7 @@
           ]
         }
       ],
-      "artifactName": "Queue SaaS Bot Setup.${ext}"
+      "artifactName": "FasaWait Bot Setup.${ext}"
     },
     "nsis": {
       "oneClick": false,

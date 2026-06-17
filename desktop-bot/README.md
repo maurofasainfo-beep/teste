@@ -1,13 +1,13 @@
-# Queue SaaS Bot Desktop
+# FasaWait Bot
 
-App desktop Windows em Electron para consumir eventos QWEP v1 do Queue SaaS e enviar mensagens pelo WhatsApp Web.
+App desktop Windows em Electron para consumir eventos QWEP v1 do FasaWait e enviar mensagens pelo WhatsApp Web.
 
-Este app e separado da extensao Chrome. Ele nao altera o SaaS, o banco Supabase, as APIs QWEP nem a extensao existente.
+O app e separado da extensao Chrome. Ele nao altera o SaaS, o banco Supabase, as APIs QWEP nem a extensao existente.
 
 ## Requisitos
 
 - Node.js 20 ou superior.
-- SaaS Queue rodando localmente ou publicado.
+- FasaWait rodando localmente ou publicado.
 - Um dispositivo WhatsApp criado no painel `Configuracoes > WhatsApp`.
 - Token do dispositivo e Signing Secret copiados no momento de criacao do dispositivo.
 - Dispositivo marcado como emissor principal.
@@ -30,7 +30,7 @@ O app abre o painel do bot. Use `Abrir WhatsApp` para carregar `https://web.what
 ## Configurar credenciais
 
 1. Abra o painel do app.
-2. Informe a URL do SaaS.
+2. Informe a URL do FasaWait.
    - Desenvolvimento: `http://localhost:3000`
    - Producao: URL publicada do SaaS
 3. Informe o token do dispositivo.
@@ -45,8 +45,8 @@ As credenciais ficam no diretorio de dados do usuario do Electron. No Windows, o
 
 1. Clique em `Abrir WhatsApp`.
 2. Aguarde o WhatsApp Web carregar.
-3. Confirme que o status esta `connected`.
-4. Clique em `Iniciar bot`.
+3. Confirme que o status esta `Conectado`.
+4. Clique em `Iniciar`.
 
 Com o bot ativo:
 
@@ -59,7 +59,7 @@ Com o bot ativo:
 
 ## Inicializar com Windows
 
-Marque `Iniciar junto com o Windows` e salve. O app usa `app.setLoginItemSettings` do Electron.
+Marque `Iniciar com Windows` e salve. O app usa `app.setLoginItemSettings` do Electron.
 
 ## Bandeja do sistema
 
@@ -82,12 +82,12 @@ npm run dist
 O instalador sera gerado em:
 
 ```text
-desktop-bot/dist/Queue SaaS Bot Setup.exe
+desktop-bot/dist/FasaWait Bot Setup.exe
 ```
 
 ## Teste com o SaaS
 
-1. Rode o SaaS.
+1. Rode o FasaWait.
 2. Entre como admin da empresa.
 3. Acesse `Configuracoes > WhatsApp`.
 4. Crie um dispositivo e copie token + Signing Secret.
@@ -96,8 +96,8 @@ desktop-bot/dist/Queue SaaS Bot Setup.exe
 7. Configure URL, token e Signing Secret.
 8. Clique em `Testar conexao`.
 9. Clique em `Abrir WhatsApp` e escaneie o QR Code.
-10. Clique em `Iniciar bot`.
-11. No SaaS, selecione o canal `Extensao WhatsApp`, se aplicavel.
+10. Clique em `Iniciar`.
+11. No SaaS, selecione o canal `Extensao WhatsApp`.
 12. Cadastre um cliente na fila.
 13. Confirme que foi criado um `message_event` com `provider = whatsapp_extension` e `status = pending`.
 14. Aguarde um ciclo de polling.
@@ -114,9 +114,9 @@ desktop-bot/dist/Queue SaaS Bot Setup.exe
 - O envio nao usa navegacao para URL de conversa.
 - O app nao altera banco nem chama Supabase diretamente.
 
-## Limitacoes do MVP
+## Limitacoes
 
-- O envio ainda depende de APIs internas do WhatsApp Web, que podem mudar.
+- O envio depende de APIs internas do WhatsApp Web, que podem mudar.
 - Se a API interna estiver indisponivel, o app nao navega para conversa automaticamente; ele marca falha para retry pelo backend.
 - O WhatsApp pode limitar ou bloquear automacoes dependendo do volume e comportamento.
 - Para operacao mais robusta em producao, Evolution API ou API Oficial WhatsApp continuam sendo alternativas recomendadas.

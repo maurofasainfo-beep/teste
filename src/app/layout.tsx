@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Queue SaaS",
+  title: "FasaWait",
   description: "SaaS multiempresa para gerenciamento de filas.",
 };
 
