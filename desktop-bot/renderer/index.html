@@ -12,99 +12,168 @@
   </head>
   <body>
     <main class="app-shell">
-      <aside class="sidebar">
-        <div>
-          <div class="brand-mark">Q</div>
-          <p class="eyebrow">QWEP v1</p>
-          <h1>Queue SaaS Bot</h1>
-          <p class="muted">Cliente desktop para WhatsApp Web.</p>
+      <aside class="sidebar" aria-label="Resumo do bot">
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true">Q</div>
+          <div>
+            <p class="eyebrow">QWEP v1</p>
+            <h1>Queue SaaS Bot</h1>
+            <p class="muted">Cliente desktop para WhatsApp Web.</p>
+          </div>
         </div>
 
-        <section class="status-card">
+        <section class="bot-card" aria-live="polite">
           <span id="bot-status-dot" class="dot"></span>
           <div>
-            <p class="label">Bot</p>
+            <p class="label">Estado do bot</p>
             <strong id="bot-status">Parado</strong>
           </div>
         </section>
 
-        <section class="status-list">
-          <p><span>SaaS</span><strong id="auth-status">-</strong></p>
-          <p><span>WhatsApp</span><strong id="whatsapp-status">-</strong></p>
-          <p><span>Empresa</span><strong id="company-name">-</strong></p>
-          <p><span>Principal</span><strong id="primary-status">-</strong></p>
+        <section class="sidebar-footer">
+          <p class="footer-title">Conexoes</p>
+          <div class="status-list">
+            <p>
+              <span><i id="auth-dot" class="mini-dot"></i>SaaS</span>
+              <strong id="auth-status">-</strong>
+            </p>
+            <p>
+              <span><i id="whatsapp-dot" class="mini-dot"></i>WhatsApp</span>
+              <strong id="whatsapp-status">-</strong>
+            </p>
+            <p>
+              <span><i class="mini-dot neutral"></i>Empresa</span>
+              <strong id="company-name">-</strong>
+            </p>
+            <p>
+              <span><i id="primary-dot" class="mini-dot"></i>Principal</span>
+              <strong id="primary-status">-</strong>
+            </p>
+          </div>
         </section>
       </aside>
 
       <section class="content">
         <header class="topbar">
-          <div>
+          <div class="title-block">
             <p class="eyebrow">Operacao</p>
-            <h2>Painel do bot</h2>
+            <h2>Painel do Bot</h2>
+            <p class="subtitle">Monitore o envio automatico sem alterar o fluxo QWEP.</p>
           </div>
-          <div class="topbar-actions">
-            <button id="open-whatsapp" type="button" class="secondary">
+          <div class="topbar-actions" aria-label="Acoes principais">
+            <button id="open-whatsapp" type="button" class="button secondary">
               Abrir WhatsApp
             </button>
-            <button id="stop-bot" type="button" class="secondary danger">
-              Parar
+            <button id="stop-bot" type="button" class="button ghost-danger">
+              Pausar Bot
             </button>
-            <button id="start-bot" type="button" class="primary">
-              Iniciar bot
+            <button id="start-bot" type="button" class="button primary">
+              Iniciar Bot
             </button>
           </div>
         </header>
 
         <section class="grid">
-          <article class="panel">
+          <article class="panel config-panel">
             <div class="panel-header">
               <div>
                 <p class="eyebrow">Configuracao</p>
                 <h3>Credenciais do dispositivo</h3>
               </div>
-              <button id="test-connection" type="button" class="secondary">
+              <button id="test-connection" type="button" class="button secondary">
                 Testar conexao
               </button>
             </div>
 
             <form id="config-form" class="form">
-              <label>
+              <label class="field">
                 <span>URL do SaaS</span>
-                <input
-                  id="base-url"
-                  type="url"
-                  placeholder="http://localhost:3000"
-                  autocomplete="off"
-                  required
-                />
+                <div class="input-shell">
+                  <input
+                    id="base-url"
+                    type="url"
+                    placeholder="http://localhost:3000"
+                    autocomplete="off"
+                    required
+                  />
+                  <button
+                    id="copy-base-url"
+                    type="button"
+                    class="input-action"
+                    title="Copiar URL"
+                    aria-label="Copiar URL do SaaS"
+                  >
+                    Copiar
+                  </button>
+                </div>
               </label>
 
-              <label>
+              <label class="field">
                 <span>Token do dispositivo</span>
-                <input
-                  id="token"
-                  type="password"
-                  placeholder="qwep_live_..."
-                  autocomplete="new-password"
-                />
+                <div class="input-shell">
+                  <input
+                    id="token"
+                    type="password"
+                    placeholder="qwep_live_..."
+                    autocomplete="new-password"
+                  />
+                  <button
+                    id="toggle-token"
+                    type="button"
+                    class="input-action"
+                    title="Mostrar ou ocultar token digitado"
+                    aria-label="Mostrar ou ocultar token digitado"
+                  >
+                    Mostrar
+                  </button>
+                  <button
+                    id="copy-token"
+                    type="button"
+                    class="input-action"
+                    title="Copiar token digitado"
+                    aria-label="Copiar token digitado"
+                  >
+                    Copiar
+                  </button>
+                </div>
               </label>
 
-              <label>
+              <label class="field">
                 <span>Signing Secret</span>
-                <input
-                  id="signing-secret"
-                  type="password"
-                  placeholder="qwep_sig_..."
-                  autocomplete="new-password"
-                />
+                <div class="input-shell">
+                  <input
+                    id="signing-secret"
+                    type="password"
+                    placeholder="qwep_sig_..."
+                    autocomplete="new-password"
+                  />
+                  <button
+                    id="toggle-signing-secret"
+                    type="button"
+                    class="input-action"
+                    title="Mostrar ou ocultar signing secret digitado"
+                    aria-label="Mostrar ou ocultar signing secret digitado"
+                  >
+                    Mostrar
+                  </button>
+                  <button
+                    id="copy-signing-secret"
+                    type="button"
+                    class="input-action"
+                    title="Copiar signing secret digitado"
+                    aria-label="Copiar signing secret digitado"
+                  >
+                    Copiar
+                  </button>
+                </div>
               </label>
 
               <div class="form-row">
-                <label>
+                <label class="field">
                   <span>Polling</span>
                   <input id="polling-interval" type="number" min="20" max="30" />
                 </label>
-                <label>
+                <label class="field">
                   <span>Delay envio ms</span>
                   <input id="send-delay" type="number" min="5000" max="10000" />
                 </label>
@@ -116,50 +185,56 @@
               </label>
 
               <div class="form-actions">
-                <button type="submit" class="primary">Salvar</button>
-                <button id="clear-config" type="button" class="secondary danger">
+                <button type="submit" class="button primary">Salvar</button>
+                <button id="clear-config" type="button" class="button ghost-danger">
                   Limpar credenciais
                 </button>
               </div>
-              <p id="credential-hint" class="hint"></p>
+              <p id="credential-hint" class="hint" aria-live="polite"></p>
             </form>
           </article>
 
-          <article class="panel">
+          <article class="panel operations-panel">
             <div class="panel-header">
               <div>
                 <p class="eyebrow">Tempo real</p>
                 <h3>Status operacional</h3>
               </div>
-              <button id="reset-state" type="button" class="secondary">
+              <button id="reset-state" type="button" class="button secondary">
                 Resetar estado
               </button>
             </div>
 
             <div class="metrics">
-              <div>
+              <div class="metric">
                 <span>Ultimo heartbeat</span>
                 <strong id="last-heartbeat">-</strong>
+                <small id="heartbeat-health">Aguardando</small>
               </div>
-              <div>
+              <div class="metric">
                 <span>Ultimo polling</span>
                 <strong id="last-polling">-</strong>
+                <small>Consulta segura</small>
               </div>
-              <div>
+              <div class="metric">
                 <span>Ultimo envio</span>
                 <strong id="last-send">-</strong>
+                <small>ACK automatico</small>
               </div>
-              <div>
-                <span>Processadas</span>
+              <div class="metric">
+                <span>Mensagens processadas</span>
                 <strong id="processed-count">0</strong>
+                <small>Total local</small>
               </div>
-              <div>
+              <div class="metric">
                 <span>Fila local</span>
                 <strong id="local-queue">0</strong>
+                <small>Lock anti-duplicidade</small>
               </div>
-              <div>
+              <div class="metric">
                 <span>Telefone conectado</span>
                 <strong id="connected-phone">-</strong>
+                <small>Mascarado</small>
               </div>
             </div>
 
@@ -176,11 +251,11 @@
               <p class="eyebrow">Logs locais</p>
               <h3>Eventos recentes</h3>
             </div>
-            <button id="refresh-status" type="button" class="secondary">
+            <button id="refresh-status" type="button" class="button secondary">
               Atualizar status
             </button>
           </div>
-          <div id="logs" class="logs"></div>
+          <div id="logs" class="logs" aria-live="polite"></div>
         </article>
       </section>
     </main>

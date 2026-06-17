@@ -61,9 +61,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Dispositivo bloqueado." }, { status: 403 });
   }
 
+  if (device.signing_secret_hash && !parsed.data.signing_secret) {
+    await admin.from("whatsapp_device_logs").insert({
+      company_id: device.company_id,
+      device_id: device.id,
+      event_type: "auth_failed",
+      message: "Signing secret ausente.",
+    });
+
+    return NextResponse.json({ error: "Credenciais invalidas." }, { status: 401 });
+  }
+
   if (
-    parsed.data.signing_secret &&
     device.signing_secret_hash &&
+    parsed.data.signing_secret &&
     !safeEqual(
       hashSigningSecret(parsed.data.signing_secret),
       device.signing_secret_hash,
@@ -127,4 +138,3 @@ export async function POST(request: Request) {
     server_time: now,
   });
 }
-

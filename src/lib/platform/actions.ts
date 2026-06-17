@@ -171,6 +171,20 @@ export async function resetClientUserAccessAction(formData: FormData) {
   const parsed = resetClientUserAccessSchema.parse(formDataToObject(formData));
   const admin = createAdminClient();
 
+  const { data: clientProfile, error: profileError } = await admin
+    .from("profiles")
+    .select("id")
+    .eq("user_id", parsed.user_id)
+    .maybeSingle();
+
+  if (profileError) {
+    throw new Error(profileError.message);
+  }
+
+  if (!clientProfile) {
+    throw new Error("Usuario cliente nao encontrado.");
+  }
+
   const { error } = await admin.auth.admin.updateUserById(parsed.user_id, {
     password: parsed.password,
   });

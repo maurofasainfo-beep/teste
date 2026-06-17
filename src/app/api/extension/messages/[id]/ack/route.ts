@@ -88,6 +88,9 @@ export async function POST(
         provider_response: providerResponse,
       })
       .eq("id", messageEvent.id)
+      .eq("company_id", auth.device.company_id)
+      .eq("device_id", auth.device.id)
+      .eq("reservation_id", parsed.data.reservation_id)
       .in("status", ["reserved", "processing"])
       .select("id,status")
       .single();
@@ -115,6 +118,10 @@ export async function POST(
         processing_started_at: messageEvent.processing_started_at ?? now,
       })
       .eq("id", messageEvent.id)
+      .eq("company_id", auth.device.company_id)
+      .eq("device_id", auth.device.id)
+      .eq("reservation_id", parsed.data.reservation_id)
+      .in("status", ["reserved", "processing"])
       .select("id,status")
       .single();
 
@@ -154,6 +161,10 @@ export async function POST(
       processing_started_at: shouldRetry ? null : messageEvent.processing_started_at,
     })
     .eq("id", messageEvent.id)
+    .eq("company_id", auth.device.company_id)
+    .eq("device_id", auth.device.id)
+    .eq("reservation_id", parsed.data.reservation_id)
+    .in("status", ["reserved", "processing"])
     .select("id,status,next_retry_at")
     .single();
 

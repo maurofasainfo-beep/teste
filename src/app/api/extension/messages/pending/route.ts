@@ -43,23 +43,73 @@ async function releaseExpiredReservations(
 ) {
   const now = new Date().toISOString();
 
-  await admin
+  const { data: expired, error } = await admin
     .from("message_events")
-    .update({
-      status: "retry",
-      next_retry_at: now,
-      device_id: null,
-      reservation_id: null,
-      reservation_token_hash: null,
-      reserved_at: null,
-      reservation_expires_at: null,
-      processing_started_at: null,
-      error_message: "Reserva expirada.",
-    })
+    .select("id, attempt_count, max_attempts")
     .eq("company_id", companyId)
     .in("status", ["reserved", "processing"])
     .not("reservation_expires_at", "is", null)
     .lt("reservation_expires_at", now);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const expiredEvents = (expired ?? []) as Pick<
+    MessageEvent,
+    "id" | "attempt_count" | "max_attempts"
+  >[];
+  const failedIds = expiredEvents
+    .filter((event) => event.attempt_count >= event.max_attempts)
+    .map((event) => event.id);
+  const retryIds = expiredEvents
+    .filter((event) => event.attempt_count < event.max_attempts)
+    .map((event) => event.id);
+
+  if (failedIds.length > 0) {
+    const { error: failedError } = await admin
+      .from("message_events")
+      .update({
+        status: "failed",
+        next_retry_at: null,
+        device_id: null,
+        reservation_id: null,
+        reservation_token_hash: null,
+        reserved_at: null,
+        reservation_expires_at: null,
+        processing_started_at: null,
+        failed_at: now,
+        error_message: "Reserva expirada.",
+      })
+      .eq("company_id", companyId)
+      .in("id", failedIds);
+
+    if (failedError) {
+      throw new Error(failedError.message);
+    }
+  }
+
+  if (retryIds.length > 0) {
+    const { error: retryError } = await admin
+      .from("message_events")
+      .update({
+        status: "retry",
+        next_retry_at: now,
+        device_id: null,
+        reservation_id: null,
+        reservation_token_hash: null,
+        reserved_at: null,
+        reservation_expires_at: null,
+        processing_started_at: null,
+        error_message: "Reserva expirada.",
+      })
+      .eq("company_id", companyId)
+      .in("id", retryIds);
+
+    if (retryError) {
+      throw new Error(retryError.message);
+    }
+  }
 }
 
 async function reservePendingMessageEvents({
