@@ -13,6 +13,12 @@ import {
 import { LeaveQueueDialog } from "@/components/customer-queue/leave-queue-dialog";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import {
+  buildPositionCardBackground,
+  hexToRgba,
+  normalizePublicPageBranding,
+  type PublicPageBranding,
+} from "@/lib/public-page-branding";
 import { createClient } from "@/lib/supabase/browser";
 import type { PublicCustomerQueueEntry } from "@/lib/types/database";
 import { cn, formatDateTime } from "@/lib/utils";
@@ -98,6 +104,10 @@ export function CustomerStatusCard({
   const statusCopy = getStatusCopy(viewStatus, remainingSeconds);
   const showCustomerDetails = viewStatus === "waiting" || viewStatus === "released";
   const canRefresh = viewStatus === "waiting" || viewStatus === "released";
+  const branding = useMemo(
+    () => normalizePublicPageBranding(entry),
+    [entry],
+  );
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-[430px] items-center px-3 py-3 sm:px-4 sm:py-5">
@@ -108,7 +118,13 @@ export function CustomerStatusCard({
         transition={{ duration: 0.25 }}
       >
         <header className="flex items-center justify-between gap-3 px-4 py-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <div
+            className="flex h-9 w-9 items-center justify-center rounded-full"
+            style={{
+              backgroundColor: hexToRgba(branding.primaryColor, 0.1),
+              color: branding.primaryColor,
+            }}
+          >
             <UsersRound aria-hidden className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1 text-center">
@@ -148,9 +164,17 @@ export function CustomerStatusCard({
               key={viewStatus}
             >
               {showCustomerDetails ? (
-                <CustomerDetails entry={entry} viewStatus={viewStatus} />
+                <CustomerDetails
+                  branding={branding}
+                  entry={entry}
+                  viewStatus={viewStatus}
+                />
               ) : (
-                <StatusOnly statusCopy={statusCopy} viewStatus={viewStatus} />
+                <StatusOnly
+                  branding={branding}
+                  statusCopy={statusCopy}
+                  viewStatus={viewStatus}
+                />
               )}
             </motion.div>
           </AnimatePresence>
@@ -191,9 +215,11 @@ export function CustomerStatusCard({
 }
 
 function CustomerDetails({
+  branding,
   entry,
   viewStatus,
 }: {
+  branding: PublicPageBranding;
   entry: PublicCustomerQueueEntry;
   viewStatus: CustomerViewStatus;
 }) {
@@ -205,29 +231,31 @@ function CustomerDetails({
   return (
     <div className="space-y-3">
       <section
-        className={cn(
-          "relative flex h-[172px] flex-col items-center justify-center overflow-hidden rounded-[1.75rem] px-5 text-center text-white shadow-[0_18px_40px_rgba(15,118,110,0.24)]",
-          viewStatus === "released"
-            ? "bg-[linear-gradient(135deg,#10B981_0%,#0F766E_58%,#0F172A_100%)]"
-            : "bg-[linear-gradient(135deg,#0F766E_0%,#14B8A6_52%,#0F172A_100%)]",
-        )}
+        className="relative flex aspect-[16/7] min-h-[170px] max-h-[220px] flex-col items-center justify-center overflow-hidden rounded-[1.75rem] bg-cover bg-center px-5 text-center shadow-[0_18px_40px_rgba(15,23,42,0.22)]"
+        style={{
+          backgroundColor: branding.primaryColor,
+          backgroundImage: buildPositionCardBackground(branding),
+          color: branding.textColor,
+          textShadow: "0 1px 4px rgba(15, 23, 42, 0.55)",
+        }}
       >
-        <div className="absolute -left-10 -top-12 h-32 w-32 rounded-full bg-white/15 blur-xl" />
-        <div className="absolute -bottom-12 -right-8 h-36 w-36 rounded-full bg-white/10 blur-xl" />
-        <p className="relative text-xs font-semibold uppercase tracking-[0.18em] text-white/75">
+        <p className="relative text-xs font-semibold uppercase tracking-[0.18em] opacity-80">
           {viewStatus === "released" ? "Voce foi chamado" : "Posicao atual"}
         </p>
         <p className="relative mt-2 text-6xl font-bold leading-none tracking-normal">
           {positionText}
         </p>
-        <p className="relative mt-2 text-sm font-medium text-white/85">
+        <p className="relative mt-2 text-sm font-medium opacity-90">
           {viewStatus === "released" ? "compareca ao atendimento" : "na fila de espera"}
         </p>
       </section>
 
       <section className="rounded-[1.5rem] border border-border/70 bg-background p-4">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-sm font-bold text-primary-foreground">
+          <div
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-sm font-bold text-white"
+            style={{ backgroundColor: branding.primaryColor }}
+          >
             {getCompanyInitial(entry.company_trade_name)}
           </div>
           <div className="min-w-0 flex-1">
@@ -266,8 +294,17 @@ function CustomerDetails({
       </section>
 
       {viewStatus === "waiting" && entry.estimated_wait_available ? (
-        <section className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+        <section
+          className="flex items-center gap-3 rounded-2xl border px-4 py-3"
+          style={{
+            backgroundColor: hexToRgba(branding.primaryColor, 0.06),
+            borderColor: hexToRgba(branding.primaryColor, 0.22),
+          }}
+        >
+          <div
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white"
+            style={{ backgroundColor: branding.primaryColor }}
+          >
             <Clock3 aria-hidden className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
@@ -294,9 +331,11 @@ function CustomerDetails({
 }
 
 function StatusOnly({
+  branding,
   statusCopy,
   viewStatus,
 }: {
+  branding: PublicPageBranding;
   statusCopy: { title: string; description: string };
   viewStatus: CustomerViewStatus;
 }) {
@@ -311,6 +350,14 @@ function StatusOnly({
           viewStatus === "cancelled" && "bg-danger/10 text-danger",
           viewStatus === "completed" && "bg-primary/10 text-primary",
         )}
+        style={
+          viewStatus === "completed"
+            ? {
+                backgroundColor: hexToRgba(branding.primaryColor, 0.1),
+                color: branding.primaryColor,
+              }
+            : undefined
+        }
       >
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-card shadow-sm">
           <Icon aria-hidden className="h-6 w-6" />

@@ -99,6 +99,11 @@ export type PublicCustomerQueueEntry = {
   estimated_wait_max_minutes: number | null;
   estimated_wait_label: string | null;
   estimated_wait_available: boolean;
+  public_page_primary_color: string;
+  public_page_secondary_color: string;
+  public_page_position_card_background_url: string | null;
+  public_page_position_card_overlay_color: string;
+  public_page_position_card_text_color: string;
 };
 
 export type Database = {
@@ -165,6 +170,11 @@ export type Database = {
           estimated_wait_default_minutes: number;
           estimated_wait_sample_size: number;
           estimated_wait_margin_percent: number;
+          public_page_primary_color: string;
+          public_page_secondary_color: string;
+          public_page_position_card_background_url: string | null;
+          public_page_position_card_overlay_color: string;
+          public_page_position_card_text_color: string;
           created_at: string;
           updated_at: string;
         };
@@ -176,6 +186,11 @@ export type Database = {
           estimated_wait_default_minutes?: number;
           estimated_wait_sample_size?: number;
           estimated_wait_margin_percent?: number;
+          public_page_primary_color?: string;
+          public_page_secondary_color?: string;
+          public_page_position_card_background_url?: string | null;
+          public_page_position_card_overlay_color?: string;
+          public_page_position_card_text_color?: string;
           created_at?: string;
           updated_at?: string;
         };

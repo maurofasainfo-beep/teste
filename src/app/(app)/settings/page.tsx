@@ -10,12 +10,14 @@ import {
   TimerReset,
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
+import { PublicPageBrandingPanel } from "@/components/settings/public-page-branding-panel";
 import { WhatsAppDevicesPanel } from "@/components/settings/whatsapp-devices-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { requireAdmin } from "@/lib/auth/session";
+import { normalizePublicPageBranding } from "@/lib/public-page-branding";
 import { updateQueueSettingsAction } from "@/lib/queue/customer-queue-actions";
 import { createClient } from "@/lib/supabase/server";
 
@@ -76,6 +78,7 @@ export default async function SettingsPage() {
   const estimatedWaitSampleSize = settings?.estimated_wait_sample_size ?? 10;
   const estimatedWaitMarginPercent =
     settings?.estimated_wait_margin_percent ?? 25;
+  const publicPageBranding = normalizePublicPageBranding(settings ?? {});
 
   return (
     <>
@@ -265,6 +268,11 @@ export default async function SettingsPage() {
               </form>
             </div>
           </section>
+
+          <PublicPageBrandingPanel
+            initialBranding={publicPageBranding}
+            key={publicPageBranding.backgroundUrl ?? "no-background"}
+          />
 
           <section className="grid gap-4 md:grid-cols-2">
             <div className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">

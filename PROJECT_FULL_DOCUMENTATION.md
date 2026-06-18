@@ -295,6 +295,7 @@ Arquivos de documentacao existentes:
 | `024_update_public_customer_link_expiration.sql` | Oculta dados sensiveis apos expiracao/finalizacao |
 | `025_harden_whatsapp_device_rpc.sql` | Restringe a RPC de dispositivo principal e remove grants publicos |
 | `026_add_estimated_wait_time.sql` | Adiciona configuracoes e estimativa publica de espera por empresa |
+| `027_add_public_page_branding.sql` | Adiciona branding por empresa, bucket de assets e RPC publica atualizada |
 | `999_cleanup_operational_test_data.sql` | Limpa apenas dados operacionais de teste |
 
 ### 6.2 Tabelas
@@ -372,6 +373,11 @@ Campos:
 - `estimated_wait_default_minutes`
 - `estimated_wait_sample_size`
 - `estimated_wait_margin_percent`
+- `public_page_primary_color`
+- `public_page_secondary_color`
+- `public_page_position_card_background_url`
+- `public_page_position_card_overlay_color`
+- `public_page_position_card_text_color`
 - `created_at`
 - `updated_at`
 
@@ -381,7 +387,19 @@ Restricoes:
 - `estimated_wait_default_minutes` entre 1 e 120.
 - `estimated_wait_sample_size` entre 3 e 50.
 - `estimated_wait_margin_percent` entre 0 e 100.
+- Cores publicas no formato HEX `#RRGGBB`.
+- URL de fundo nula ou URL HTTPS do bucket `company-public-assets`.
 - `notification_channel`: `none`, `simulated`, `whatsapp_extension`, `evolution_api`, `sms`.
+
+#### Storage `company-public-assets`
+
+Bucket publico usado apenas para imagens da pagina publica do cliente.
+
+- Limite por arquivo: 2 MB.
+- MIME permitido: JPG, PNG e WebP.
+- Caminho: `{company_id}/customer-page/position-card-background`.
+- Upload, substituicao e remocao exigem admin da empresa dona da pasta.
+- Leitura do arquivo e publica para permitir uso no link do cliente.
 
 #### `queue_entries`
 
@@ -839,6 +857,7 @@ Quando valido:
 - Status.
 - Codigo discreto, se retornado.
 - Faixa estimada de espera enquanto o status e `waiting`.
+- Cores e imagem publica configuradas pela empresa.
 - Tempo restante quando chamado.
 
 Telefone completo nunca e exposto na pagina publica.
@@ -888,6 +907,19 @@ O componente atual e mobile-first:
 - Posicao como elemento principal.
 - Grade compacta 2x2.
 - Botoes compactos.
+
+### Personalizacao visual
+
+A migration `027` adiciona branding por empresa somente para esta pagina:
+
+- Cor principal e secundaria.
+- Cor do overlay e do texto.
+- Imagem de fundo opcional no card de posicao.
+- Fallback para gradiente quando a imagem nao existe ou a URL e invalida.
+- Card com proporcao aproximada de 16:7, preenchimento `cover` e centro da imagem.
+
+O painel `/settings` permite salvar cores, visualizar preview, enviar e remover a
+imagem. O display publico e as telas administrativas nao usam esse branding.
 
 ---
 
@@ -1622,6 +1654,7 @@ Extensao:
 - Tenant isolado por `company_id`.
 - Plataforma isolada por `platform_profiles`.
 - APIs QWEP derivam `company_id` do token do dispositivo; cliente nao informa `company_id` como autoridade.
+- Assets publicos usam pasta iniciada pela `company_id`; policies de Storage exigem admin da mesma empresa para escrita e remocao.
 
 ### Mascaramento
 
@@ -1757,7 +1790,7 @@ Executar manualmente no Supabase SQL Editor:
 ```text
 database/001_create_companies.sql
 ...
-database/026_add_estimated_wait_time.sql
+database/027_add_public_page_branding.sql
 ```
 
 Script utilitario opcional:
@@ -1808,6 +1841,7 @@ Preserva:
 - [x] Expiracao real do link apos `released_at`.
 - [x] Ocultacao de dados sensiveis apos expirar/cancelar/concluir.
 - [x] Estimativa de espera por empresa no link publico do cliente.
+- [x] Branding por empresa com cores, preview e imagem no card de posicao.
 - [x] Display publico por slug.
 - [x] Display publico com tema claro/escuro.
 - [x] Modo TV e fullscreen.

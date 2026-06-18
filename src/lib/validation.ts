@@ -130,6 +130,19 @@ export const queueSettingsSchema = z.object({
     .max(100, "O maximo e 100%."),
 });
 
+const hexColorSchema = z
+  .string()
+  .trim()
+  .regex(/^#[0-9A-Fa-f]{6}$/, "Informe uma cor HEX valida.")
+  .transform((value) => value.toUpperCase());
+
+export const publicPageBrandingSchema = z.object({
+  public_page_primary_color: hexColorSchema,
+  public_page_secondary_color: hexColorSchema,
+  public_page_position_card_overlay_color: hexColorSchema,
+  public_page_position_card_text_color: hexColorSchema,
+});
+
 export const notificationChannelSchema = z.object({
   notification_channel: z.enum([
     "none",
