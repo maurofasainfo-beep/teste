@@ -141,7 +141,9 @@ async function runAction(action) {
 
 function render(snapshot) {
   lastSnapshot = snapshot;
-  const { config, state, logs } = snapshot;
+  const config = snapshot?.config ?? null;
+  const state = snapshot?.state ?? {};
+  const logs = Array.isArray(snapshot?.logs) ? snapshot.logs : [];
 
   if (document.activeElement !== elements.baseUrl) {
     elements.baseUrl.value = config?.baseUrl ?? elements.baseUrl.value ?? "";
@@ -156,23 +158,49 @@ function render(snapshot) {
 
   elements.authStatus.textContent = formatAuthStatus(state.authStatus);
   elements.whatsappStatus.textContent = formatWhatsAppStatus(state.whatsappStatus);
-  elements.companyName.textContent = state.companyName || "-";
+  elements.companyName.textContent = formatDisplayValue(
+    state.companyName,
+    "Não conectada",
+  );
   elements.primaryStatus.textContent = state.primarySenderKnown
     ? state.isPrimarySender
       ? "Principal"
-      : "Nao principal"
+      : "Não principal"
     : "Aguardando";
   elements.connectedPhone.textContent = maskPhone(state.connectedPhone);
-  elements.lastHeartbeat.textContent = formatRelativeDate(state.lastHeartbeatAt);
-  elements.lastHeartbeat.title = formatDate(state.lastHeartbeatAt);
-  elements.lastPolling.textContent = formatRelativeDate(state.lastPollingAt);
-  elements.lastPolling.title = formatDate(state.lastPollingAt);
-  elements.lastSend.textContent = formatRelativeDate(state.lastSendAt);
-  elements.lastSend.title = formatDate(state.lastSendAt);
+  elements.lastHeartbeat.textContent = formatRelativeDate(
+    state.lastHeartbeatAt,
+    "Aguardando",
+  );
+  elements.lastHeartbeat.title = formatDate(
+    state.lastHeartbeatAt,
+    "Sinal ainda não recebido",
+  );
+  elements.lastPolling.textContent = formatRelativeDate(
+    state.lastPollingAt,
+    "Aguardando consulta",
+  );
+  elements.lastPolling.title = formatDate(
+    state.lastPollingAt,
+    "Consulta ainda não realizada",
+  );
+  elements.lastSend.textContent = formatRelativeDate(
+    state.lastSendAt,
+    "Nenhum envio ainda",
+  );
+  elements.lastSend.title = formatDate(
+    state.lastSendAt,
+    "Nenhuma mensagem enviada",
+  );
   elements.processedCount.textContent = String(state.processedCount ?? 0);
   elements.localQueue.textContent = String(state.localQueueSize ?? 0);
-  elements.botStatus.textContent = state.botRunning ? "Rodando" : "Pausado";
+  elements.botStatus.textContent = getBotStatusLabel(state, config);
+  elements.botStatusDot.classList.remove("on", "bad");
   elements.botStatusDot.classList.toggle("on", Boolean(state.botRunning));
+  elements.botStatusDot.classList.toggle(
+    "bad",
+    String(state.authStatus ?? "").toLowerCase() === "error",
+  );
   elements.heartbeatHealth.textContent = getHeartbeatHealthLabel(state.lastHeartbeatAt);
 
   setIndicator(elements.authDot, getAuthLevel(state.authStatus));
@@ -185,9 +213,9 @@ function render(snapshot) {
 
   const hasError = Boolean(state.lastError);
   elements.lastErrorBox.classList.toggle("hidden", !hasError);
-  elements.lastError.textContent = state.lastError || "-";
+  elements.lastError.textContent = formatFriendlyError(state.lastError);
 
-  renderLogs(logs ?? []);
+  renderLogs(logs);
 }
 
 function renderLogs(logs) {
@@ -196,12 +224,12 @@ function renderLogs(logs) {
   if (!logs.length) {
     const empty = document.createElement("p");
     empty.className = "empty";
-    empty.textContent = "Nenhum evento local registrado.";
+    empty.textContent = "Nenhum evento recente ainda.";
     elements.logs.appendChild(empty);
     return;
   }
 
-  for (const log of logs.slice(0, 30)) {
+  for (const log of logs.slice(0, 24)) {
     const item = document.createElement("article");
     const level = normalizeLogLevel(log.level, log.event);
     item.className = `log ${level}`;
@@ -213,16 +241,13 @@ function renderLogs(logs) {
     const card = document.createElement("div");
     card.className = "log-card";
 
-    const header = document.createElement("div");
-    header.className = "log-header";
     const eventName = document.createElement("strong");
     eventName.className = "log-title";
     const at = document.createElement("span");
     at.className = "log-time";
     eventName.textContent = humanizeEvent(log.event);
-    at.textContent = formatTime(log.at);
-    at.title = formatDate(log.at);
-    header.append(eventName, at);
+    at.textContent = formatTime(log.at, "Agora");
+    at.title = formatDate(log.at, "Horário não informado");
 
     const badge = document.createElement("span");
     badge.className = "log-badge";
@@ -230,9 +255,9 @@ function renderLogs(logs) {
 
     const message = document.createElement("p");
     message.className = "log-message";
-    message.textContent = log.message ?? "";
+    message.textContent = formatLogMessage(log.message, log.event);
 
-    card.append(header, badge, message);
+    card.append(badge, eventName, message, at);
     item.append(marker, card);
     elements.logs.appendChild(item);
   }
@@ -252,29 +277,138 @@ function getCredentialHint(config) {
   return "Credenciais salvas neste computador.";
 }
 
-function formatDate(value) {
-  if (!value) {
-    return "-";
+function getBotStatusLabel(state, config) {
+  const authStatus = String(state.authStatus ?? "").toLowerCase();
+  const whatsappStatus = String(state.whatsappStatus ?? "").toLowerCase();
+  const hasCredentials = Boolean(config?.hasToken && config?.hasSigningSecret);
+
+  if (!config || !hasCredentials || authStatus === "not_configured") {
+    return "Aguardando configuração";
   }
 
-  const date = new Date(value);
+  if (authStatus === "authenticating") {
+    return "Conectando";
+  }
+
+  if (authStatus === "error") {
+    return "Erro de conexão";
+  }
+
+  if (state.botRunning && ["disconnected", "error"].includes(whatsappStatus)) {
+    return "WhatsApp desconectado";
+  }
+
+  return state.botRunning ? "Bot rodando" : "Bot pausado";
+}
+
+function formatFriendlyError(value) {
+  const message = formatDisplayValue(
+    value,
+    "Não foi possível concluir a operação.",
+  );
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes("erro desconhecido")) {
+    return "Não foi possível concluir a operação.";
+  }
+
+  if (
+    normalized.includes("fetch failed") ||
+    normalized.includes("econnrefused") ||
+    normalized.includes("enotfound")
+  ) {
+    return "Não foi possível acessar o FasaWait. Verifique a URL e sua conexão.";
+  }
+
+  if (
+    normalized.includes("api qwep indisponivel") ||
+    normalized.includes("respondeu html")
+  ) {
+    return "A URL informada não respondeu como esperado. Verifique o endereço do FasaWait.";
+  }
+
+  if (
+    normalized.includes("unauthorized") ||
+    normalized.includes("não autorizado") ||
+    normalized.includes("nao autorizado") ||
+    normalized.includes("invalid token")
+  ) {
+    return "As credenciais do dispositivo são inválidas ou expiraram.";
+  }
+
+  if (normalized.includes("signing secret")) {
+    return "O Signing Secret não foi aceito. Gere novas credenciais do dispositivo.";
+  }
+
+  return message.replace(/\bunknown\b/gi, "informação indisponível");
+}
+
+function formatLogMessage(value, eventName) {
+  const friendlyMessages = {
+    auth_ok: "Dispositivo autenticado com sucesso.",
+    bot_started: "Processamento automático iniciado.",
+    bot_stopped: "Processamento automático pausado.",
+    message_sent: "Envio confirmado com sucesso.",
+    state_reset: "Estado local limpo com sucesso.",
+  };
+  const fallback = friendlyMessages[eventName] ?? "Evento registrado.";
+  const message = formatDisplayValue(value, fallback);
+
+  if (
+    String(eventName ?? "").includes("failed") ||
+    String(eventName ?? "").includes("error")
+  ) {
+    return formatFriendlyError(message);
+  }
+
+  if (friendlyMessages[eventName]) {
+    return friendlyMessages[eventName];
+  }
+
+  return message.replace(/\bunknown\b/gi, "informação indisponível");
+}
+
+function formatDisplayValue(value, fallback = "Não informado") {
+  if (value === null || value === undefined) {
+    return fallback;
+  }
+
+  const text = String(value).trim();
+
+  if (!text || ["unknown", "undefined", "null", "-"].includes(text.toLowerCase())) {
+    return fallback;
+  }
+
+  return text;
+}
+
+function formatDate(value, fallback = "Não informado") {
+  const safeValue = formatDisplayValue(value, "");
+
+  if (!safeValue) {
+    return fallback;
+  }
+
+  const date = new Date(safeValue);
 
   if (Number.isNaN(date.getTime())) {
-    return "-";
+    return fallback;
   }
 
   return date.toLocaleString("pt-BR");
 }
 
-function formatTime(value) {
-  if (!value) {
-    return "-";
+function formatTime(value, fallback = "Aguardando") {
+  const safeValue = formatDisplayValue(value, "");
+
+  if (!safeValue) {
+    return fallback;
   }
 
-  const date = new Date(value);
+  const date = new Date(safeValue);
 
   if (Number.isNaN(date.getTime())) {
-    return "-";
+    return fallback;
   }
 
   return date.toLocaleTimeString("pt-BR", {
@@ -283,15 +417,17 @@ function formatTime(value) {
   });
 }
 
-function formatRelativeDate(value) {
-  if (!value) {
-    return "-";
+function formatRelativeDate(value, fallback = "Aguardando") {
+  const safeValue = formatDisplayValue(value, "");
+
+  if (!safeValue) {
+    return fallback;
   }
 
-  const date = new Date(value);
+  const date = new Date(safeValue);
 
   if (Number.isNaN(date.getTime())) {
-    return "-";
+    return fallback;
   }
 
   const seconds = Math.max(0, Math.round((Date.now() - date.getTime()) / 1000));
@@ -301,19 +437,19 @@ function formatRelativeDate(value) {
   }
 
   if (seconds < 60) {
-    return `ha ${seconds}s`;
+    return `há ${seconds}s`;
   }
 
   const minutes = Math.round(seconds / 60);
 
   if (minutes < 60) {
-    return `ha ${minutes}min`;
+    return `há ${minutes}min`;
   }
 
   const hours = Math.round(minutes / 60);
 
   if (hours < 24) {
-    return `ha ${hours}h`;
+    return `há ${hours}h`;
   }
 
   return date.toLocaleDateString("pt-BR");
@@ -323,7 +459,7 @@ function maskPhone(value) {
   const digits = String(value ?? "").replace(/\D/g, "");
 
   if (!digits) {
-    return "-";
+    return "Não identificado";
   }
 
   const tail = digits.slice(-4);
@@ -347,7 +483,7 @@ function showInlineError(message) {
     ...snapshot,
     state: {
       ...(snapshot.state ?? {}),
-      lastError: String(message ?? "Erro desconhecido."),
+      lastError: formatFriendlyError(message),
     },
   });
 }
@@ -413,7 +549,7 @@ function getAuthLevel(status) {
     return "warn";
   }
 
-  if (value === "-" || !value) {
+  if (["-", "not_configured", "undefined", "null", ""].includes(value)) {
     return "neutral";
   }
 
@@ -431,7 +567,7 @@ function getWhatsAppLevel(status) {
     return "warn";
   }
 
-  if (value === "-" || value === "unknown" || !value) {
+  if (["-", "unknown", "undefined", "null", ""].includes(value)) {
     return "neutral";
   }
 
@@ -454,7 +590,7 @@ function getHeartbeatLevel(value) {
 }
 
 function getHeartbeatHealthLabel(value) {
-  return getHeartbeatLevel(value) === "good" ? "Online" : "Aguardando sinal";
+  return getHeartbeatLevel(value) === "good" ? "Online" : "Sem sinal";
 }
 
 function formatAuthStatus(status) {
@@ -473,14 +609,14 @@ function formatAuthStatus(status) {
   }
 
   if (value === "not_configured") {
-    return "Nao configurado";
+    return "Não configurado";
   }
 
-  if (!value || value === "undefined") {
-    return "-";
+  if (["", "unknown", "undefined", "null", "-"].includes(value)) {
+    return "Aguardando configuração";
   }
 
-  return status;
+  return "Aguardando conexão";
 }
 
 function formatWhatsAppStatus(status) {
@@ -499,30 +635,46 @@ function formatWhatsAppStatus(status) {
   }
 
   if (value === "loading") {
-    return "Carregando";
+    return "Conectando";
   }
 
-  if (!value || value === "undefined") {
-    return "-";
+  if (value === "syncing") {
+    return "Sincronizando";
   }
 
-  return status;
+  if (value === "sending") {
+    return "Enviando";
+  }
+
+  if (value === "error") {
+    return "Erro de conexão";
+  }
+
+  return "Aguardando conexão";
 }
 
 function normalizeLogLevel(level, eventName) {
   const value = String(level ?? "").toLowerCase();
   const event = String(eventName ?? "").toLowerCase();
 
-  if (["success", "sent", "ok"].includes(value) || event.includes("sent")) {
-    return "success";
+  if (
+    ["error", "failed"].includes(value) ||
+    event.includes("failed") ||
+    event.includes("error")
+  ) {
+    return "error";
   }
 
   if (["warn", "warning"].includes(value) || event.includes("retry")) {
     return "warn";
   }
 
-  if (["error", "failed"].includes(value) || event.includes("failed")) {
-    return "error";
+  if (
+    ["success", "sent", "ok"].includes(value) ||
+    event === "auth_ok" ||
+    event === "message_sent"
+  ) {
+    return "success";
   }
 
   return "info";
@@ -530,7 +682,7 @@ function normalizeLogLevel(level, eventName) {
 
 function getLevelLabel(level) {
   if (level === "success") {
-    return "ok";
+    return "sucesso";
   }
 
   if (level === "error") {
@@ -545,27 +697,32 @@ function getLevelLabel(level) {
 }
 
 function humanizeEvent(eventName) {
-  const value = String(eventName ?? "event");
+  const value = formatDisplayValue(eventName, "");
+
+  if (!value) {
+    return "Evento registrado";
+  }
+
   const labels = {
-    ack_failed: "ACK nao confirmado",
-    auth_failed: "Conexao recusada",
-    auth_ok: "Conexao validada",
-    background_error: "Erro em segundo plano",
+    ack_failed: "Confirmação não enviada",
+    auth_failed: "Conexão recusada",
+    auth_ok: "Conexão validada",
+    background_error: "Falha na operação",
     bot_started: "Bot iniciado",
     bot_stopped: "Bot pausado",
-    heartbeat_failed: "Heartbeat falhou",
-    message_already_sent: "Mensagem ja confirmada",
+    heartbeat_failed: "Sincronização falhou",
+    message_already_sent: "Mensagem já confirmada",
     message_failed_ack: "Falha registrada",
-    message_invalid: "Mensagem invalida",
+    message_invalid: "Mensagem inválida",
     message_lock_busy: "Mensagem em processamento",
     message_lock_expired: "Bloqueio local liberado",
     message_lock_timeout: "Tempo de processamento excedido",
     message_sent: "Mensagem enviada",
-    polling_failed: "Polling falhou",
-    polling_ok: "Mensagem reservada",
-    primary_sender_required: "Dispositivo nao principal",
-    sent_ack_failed: "Confirmacao falhou",
-    startup_failed: "Inicializacao falhou",
+    polling_failed: "Consulta falhou",
+    polling_ok: "Nova mensagem recebida",
+    primary_sender_required: "Dispositivo não principal",
+    sent_ack_failed: "Confirmação falhou",
+    startup_failed: "Inicialização falhou",
     state_reset: "Estado resetado",
   };
 
@@ -573,7 +730,9 @@ function humanizeEvent(eventName) {
     return labels[value];
   }
 
-  return value
+  const label = value
     .replace(/[_-]+/g, " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+  return formatDisplayValue(label, "Evento registrado");
 }

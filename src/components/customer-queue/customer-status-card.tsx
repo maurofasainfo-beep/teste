@@ -265,6 +265,25 @@ function CustomerDetails({
         <InfoItem icon={Clock3} label="Status" value={getCompactStatus(entry.status)} />
       </section>
 
+      {viewStatus === "waiting" && entry.estimated_wait_available ? (
+        <section className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+            <Clock3 aria-hidden className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-medium text-muted-foreground">
+              Tempo estimado
+            </p>
+            <p className="mt-0.5 text-lg font-semibold text-foreground">
+              {entry.estimated_wait_label ?? "Calculando"}
+            </p>
+            <p className="text-[11px] text-muted-foreground">
+              Baseado no fluxo atual
+            </p>
+          </div>
+        </section>
+      ) : null}
+
       <p className="px-1 text-center text-xs leading-5 text-muted-foreground">
         {viewStatus === "released"
           ? "Compareca ao atendimento agora."

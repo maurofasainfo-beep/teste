@@ -110,6 +110,24 @@ export const queueSettingsSchema = z.object({
     .int("Informe um numero inteiro.")
     .min(1, "O minimo e 1 minuto.")
     .max(60, "O maximo e 60 minutos."),
+  estimated_wait_enabled: z
+    .enum(["true", "false"])
+    .transform((value) => value === "true"),
+  estimated_wait_default_minutes: z.coerce
+    .number()
+    .int("Informe um numero inteiro.")
+    .min(1, "O minimo e 1 minuto.")
+    .max(120, "O maximo e 120 minutos."),
+  estimated_wait_sample_size: z.coerce
+    .number()
+    .int("Informe um numero inteiro.")
+    .min(3, "O minimo e 3 atendimentos.")
+    .max(50, "O maximo e 50 atendimentos."),
+  estimated_wait_margin_percent: z.coerce
+    .number()
+    .int("Informe um numero inteiro.")
+    .min(0, "O minimo e 0%.")
+    .max(100, "O maximo e 100%."),
 });
 
 export const notificationChannelSchema = z.object({

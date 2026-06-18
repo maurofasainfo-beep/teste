@@ -80,7 +80,6 @@ export type PublicQueueEntry = {
 };
 
 export type PublicCustomerQueueEntry = {
-  id: string;
   customer_name: string | null;
   masked_customer_phone: string | null;
   ticket_code: string | null;
@@ -96,6 +95,10 @@ export type PublicCustomerQueueEntry = {
   released_link_expiration_minutes: number;
   expires_at: string | null;
   is_expired: boolean;
+  estimated_wait_min_minutes: number | null;
+  estimated_wait_max_minutes: number | null;
+  estimated_wait_label: string | null;
+  estimated_wait_available: boolean;
 };
 
 export type Database = {
@@ -158,6 +161,10 @@ export type Database = {
           company_id: string;
           released_link_expiration_minutes: number;
           notification_channel: NotificationChannel;
+          estimated_wait_enabled: boolean;
+          estimated_wait_default_minutes: number;
+          estimated_wait_sample_size: number;
+          estimated_wait_margin_percent: number;
           created_at: string;
           updated_at: string;
         };
@@ -165,6 +172,10 @@ export type Database = {
           company_id: string;
           released_link_expiration_minutes?: number;
           notification_channel?: NotificationChannel;
+          estimated_wait_enabled?: boolean;
+          estimated_wait_default_minutes?: number;
+          estimated_wait_sample_size?: number;
+          estimated_wait_margin_percent?: number;
           created_at?: string;
           updated_at?: string;
         };

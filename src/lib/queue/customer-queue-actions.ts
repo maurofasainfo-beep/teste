@@ -147,6 +147,10 @@ export async function updateQueueSettingsAction(formData: FormData) {
       company_id: company.id,
       released_link_expiration_minutes:
         parsed.released_link_expiration_minutes,
+      estimated_wait_enabled: parsed.estimated_wait_enabled,
+      estimated_wait_default_minutes: parsed.estimated_wait_default_minutes,
+      estimated_wait_sample_size: parsed.estimated_wait_sample_size,
+      estimated_wait_margin_percent: parsed.estimated_wait_margin_percent,
     },
     { onConflict: "company_id" },
   );

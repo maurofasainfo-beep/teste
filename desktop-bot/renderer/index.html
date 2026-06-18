@@ -14,23 +14,19 @@
     <main class="app-shell">
       <header class="app-header">
         <div class="brand">
-          <div class="brand-mark" aria-hidden="true">F</div>
+          <img class="brand-mark" src="../assets/icon.png" alt="" />
           <div class="brand-copy">
-            <p class="eyebrow">Desktop</p>
             <h1>FasaWait Bot</h1>
-            <p>Envio local pelo WhatsApp Web.</p>
+            <p>Envio local pelo WhatsApp Web</p>
           </div>
         </div>
 
         <section class="bot-state" aria-live="polite">
           <span id="bot-status-dot" class="dot"></span>
-          <div>
-            <span>Bot</span>
-            <strong id="bot-status">Pausado</strong>
-          </div>
+          <strong id="bot-status">Aguardando configuração</strong>
         </section>
 
-        <div class="header-actions" aria-label="Acoes principais">
+        <div class="header-actions" aria-label="Ações principais">
           <button id="open-whatsapp" type="button" class="button secondary">
             Abrir WhatsApp
           </button>
@@ -43,22 +39,22 @@
         </div>
       </header>
 
-      <section class="status-panel" aria-label="Status">
+      <section class="status-panel" aria-label="Status da conexão">
         <article class="status-item">
           <span><i id="auth-dot" class="mini-dot"></i>SaaS</span>
-          <strong id="auth-status">-</strong>
+          <strong id="auth-status">Não configurado</strong>
         </article>
         <article class="status-item">
           <span><i id="whatsapp-dot" class="mini-dot"></i>WhatsApp</span>
-          <strong id="whatsapp-status">-</strong>
+          <strong id="whatsapp-status">Aguardando conexão</strong>
         </article>
         <article class="status-item">
           <span><i class="mini-dot neutral"></i>Empresa</span>
-          <strong id="company-name">-</strong>
+          <strong id="company-name">Não conectada</strong>
         </article>
         <article class="status-item">
-          <span><i id="primary-dot" class="mini-dot"></i>Principal</span>
-          <strong id="primary-status">-</strong>
+          <span><i id="primary-dot" class="mini-dot"></i>Dispositivo</span>
+          <strong id="primary-status">Aguardando</strong>
         </article>
       </section>
 
@@ -66,22 +62,22 @@
         <article class="panel credentials-panel">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Credenciais</p>
-              <h2>Conexao do dispositivo</h2>
+              <p class="eyebrow">Configuração</p>
+              <h2>Conexão do dispositivo</h2>
             </div>
-            <button id="test-connection" type="button" class="button secondary">
-              Testar conexao
+            <button id="test-connection" type="button" class="button secondary compact-button">
+              Testar conexão
             </button>
           </div>
 
           <form id="config-form" class="form">
             <label class="field">
-              <span>URL</span>
+              <span>URL do FasaWait</span>
               <div class="input-shell">
                 <input
                   id="base-url"
                   type="url"
-                  placeholder="http://localhost:3000"
+                  placeholder="https://app.exemplo.com"
                   autocomplete="off"
                   required
                 />
@@ -97,73 +93,75 @@
               </div>
             </label>
 
-            <label class="field">
-              <span>Token</span>
-              <div class="input-shell">
-                <input
-                  id="token"
-                  type="password"
-                  placeholder="qwep_live_..."
-                  autocomplete="new-password"
-                />
-                <button
-                  id="toggle-token"
-                  type="button"
-                  class="input-action"
-                  title="Mostrar ou ocultar token"
-                  aria-label="Mostrar ou ocultar token"
-                >
-                  Mostrar
-                </button>
-                <button
-                  id="copy-token"
-                  type="button"
-                  class="input-action"
-                  title="Copiar token"
-                  aria-label="Copiar token"
-                >
-                  Copiar
-                </button>
-              </div>
-            </label>
+            <div class="secret-fields">
+              <label class="field">
+                <span>Token do dispositivo</span>
+                <div class="input-shell">
+                  <input
+                    id="token"
+                    type="password"
+                    placeholder="Cole o token"
+                    autocomplete="new-password"
+                  />
+                  <button
+                    id="toggle-token"
+                    type="button"
+                    class="input-action"
+                    title="Mostrar ou ocultar token"
+                    aria-label="Mostrar ou ocultar token"
+                  >
+                    Mostrar
+                  </button>
+                  <button
+                    id="copy-token"
+                    type="button"
+                    class="input-action"
+                    title="Copiar token"
+                    aria-label="Copiar token"
+                  >
+                    Copiar
+                  </button>
+                </div>
+              </label>
 
-            <label class="field">
-              <span>Signing Secret</span>
-              <div class="input-shell">
-                <input
-                  id="signing-secret"
-                  type="password"
-                  placeholder="qwep_sig_..."
-                  autocomplete="new-password"
-                />
-                <button
-                  id="toggle-signing-secret"
-                  type="button"
-                  class="input-action"
-                  title="Mostrar ou ocultar signing secret"
-                  aria-label="Mostrar ou ocultar signing secret"
-                >
-                  Mostrar
-                </button>
-                <button
-                  id="copy-signing-secret"
-                  type="button"
-                  class="input-action"
-                  title="Copiar signing secret"
-                  aria-label="Copiar signing secret"
-                >
-                  Copiar
-                </button>
-              </div>
-            </label>
+              <label class="field">
+                <span>Signing Secret</span>
+                <div class="input-shell">
+                  <input
+                    id="signing-secret"
+                    type="password"
+                    placeholder="Cole o segredo"
+                    autocomplete="new-password"
+                  />
+                  <button
+                    id="toggle-signing-secret"
+                    type="button"
+                    class="input-action"
+                    title="Mostrar ou ocultar signing secret"
+                    aria-label="Mostrar ou ocultar signing secret"
+                  >
+                    Mostrar
+                  </button>
+                  <button
+                    id="copy-signing-secret"
+                    type="button"
+                    class="input-action"
+                    title="Copiar signing secret"
+                    aria-label="Copiar signing secret"
+                  >
+                    Copiar
+                  </button>
+                </div>
+              </label>
+            </div>
 
             <div class="settings-row">
               <label class="field compact">
-                <span>Polling</span>
+                <span>Polling (s)</span>
                 <input id="polling-interval" type="number" min="20" max="30" />
               </label>
               <label class="field compact">
-                <span>Delay</span>
+                <span>Delay (ms)</span>
                 <input id="send-delay" type="number" min="5000" max="10000" />
               </label>
               <label class="toggle">
@@ -172,68 +170,62 @@
               </label>
             </div>
 
-            <div class="form-actions">
-              <button type="submit" class="button primary">Salvar</button>
-              <button id="clear-config" type="button" class="button danger-soft">
-                Limpar
-              </button>
+            <div class="form-footer">
+              <div class="form-actions">
+                <button type="submit" class="button primary">Salvar</button>
+                <button id="clear-config" type="button" class="button danger-soft">
+                  Limpar
+                </button>
+              </div>
+              <p id="credential-hint" class="hint" aria-live="polite"></p>
             </div>
-            <p id="credential-hint" class="hint" aria-live="polite"></p>
           </form>
         </article>
 
         <article class="panel operations-panel">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Operacao</p>
+              <p class="eyebrow">Operação</p>
               <h2>Atividade local</h2>
             </div>
-            <div class="panel-actions">
-              <button id="refresh-status" type="button" class="button secondary">
-                Atualizar
-              </button>
-              <button id="reset-state" type="button" class="button secondary">
-                Resetar
-              </button>
-            </div>
+            <button id="reset-state" type="button" class="button secondary compact-button">
+              Resetar estado
+            </button>
           </div>
 
           <div class="metrics">
             <div class="metric">
-              <span>Ultimo heartbeat</span>
-              <strong id="last-heartbeat">-</strong>
-              <small id="heartbeat-health">Aguardando</small>
+              <span>Último heartbeat</span>
+              <div class="metric-value">
+                <strong id="last-heartbeat">Aguardando</strong>
+                <small id="heartbeat-health">Sem sinal</small>
+              </div>
             </div>
             <div class="metric">
-              <span>Ultimo polling</span>
-              <strong id="last-polling">-</strong>
-              <small>Consulta</small>
+              <span>Último polling</span>
+              <strong id="last-polling">Aguardando consulta</strong>
             </div>
             <div class="metric">
-              <span>Ultimo envio</span>
-              <strong id="last-send">-</strong>
-              <small>Mensagem</small>
+              <span>Último envio</span>
+              <strong id="last-send">Nenhum envio ainda</strong>
             </div>
             <div class="metric">
               <span>Processadas</span>
               <strong id="processed-count">0</strong>
-              <small>Total local</small>
             </div>
             <div class="metric">
               <span>Fila local</span>
               <strong id="local-queue">0</strong>
-              <small>Em andamento</small>
             </div>
             <div class="metric">
-              <span>Telefone</span>
-              <strong id="connected-phone">-</strong>
-              <small>WhatsApp</small>
+              <span>WhatsApp</span>
+              <strong id="connected-phone">Não identificado</strong>
             </div>
           </div>
 
           <div id="last-error-box" class="error-box hidden">
-            <span>Ultimo erro</span>
-            <strong id="last-error">-</strong>
+            <span>Precisa de atenção</span>
+            <strong id="last-error">Não foi possível concluir a operação.</strong>
           </div>
         </article>
       </section>
@@ -241,9 +233,12 @@
       <article class="panel logs-panel">
         <div class="panel-header">
           <div>
-            <p class="eyebrow">Eventos</p>
-            <h2>Recentes</h2>
+            <p class="eyebrow">Histórico local</p>
+            <h2>Eventos recentes</h2>
           </div>
+          <button id="refresh-status" type="button" class="button secondary compact-button">
+            Atualizar
+          </button>
         </div>
         <div id="logs" class="logs" aria-live="polite"></div>
       </article>

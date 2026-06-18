@@ -294,6 +294,7 @@ Arquivos de documentacao existentes:
 | `023_create_whatsapp_indexes.sql` | Indices QWEP/dispositivos |
 | `024_update_public_customer_link_expiration.sql` | Oculta dados sensiveis apos expiracao/finalizacao |
 | `025_harden_whatsapp_device_rpc.sql` | Restringe a RPC de dispositivo principal e remove grants publicos |
+| `026_add_estimated_wait_time.sql` | Adiciona configuracoes e estimativa publica de espera por empresa |
 | `999_cleanup_operational_test_data.sql` | Limpa apenas dados operacionais de teste |
 
 ### 6.2 Tabelas
@@ -367,12 +368,19 @@ Campos:
 - `company_id`
 - `released_link_expiration_minutes`
 - `notification_channel`
+- `estimated_wait_enabled`
+- `estimated_wait_default_minutes`
+- `estimated_wait_sample_size`
+- `estimated_wait_margin_percent`
 - `created_at`
 - `updated_at`
 
 Restricoes:
 
 - `released_link_expiration_minutes` entre 1 e 60.
+- `estimated_wait_default_minutes` entre 1 e 120.
+- `estimated_wait_sample_size` entre 3 e 50.
+- `estimated_wait_margin_percent` entre 0 e 100.
 - `notification_channel`: `none`, `simulated`, `whatsapp_extension`, `evolution_api`, `sms`.
 
 #### `queue_entries`
@@ -765,6 +773,14 @@ Em `company_settings`:
 
 - `released_link_expiration_minutes`: de 1 a 60, padrao 5.
 - Define por quanto tempo o link individual continua exibindo dados depois de `released_at`.
+- `estimated_wait_enabled`: ativa ou desativa a estimativa publica.
+- `estimated_wait_default_minutes`: de 1 a 120, padrao 15.
+- `estimated_wait_sample_size`: de 3 a 50, padrao 10.
+- `estimated_wait_margin_percent`: de 0 a 100, padrao 25.
+
+A estimativa usa os atendimentos mais recentes da mesma empresa com
+`released_at > created_at`. A posicao atual e multiplicada pela media de espera
+e recebe a margem configurada. Sem historico valido, usa o tempo padrao.
 
 ### Regras de prioridade
 
@@ -822,6 +838,7 @@ Quando valido:
 - Telefone mascarado.
 - Status.
 - Codigo discreto, se retornado.
+- Faixa estimada de espera enquanto o status e `waiting`.
 - Tempo restante quando chamado.
 
 Telefone completo nunca e exposto na pagina publica.
@@ -1740,7 +1757,7 @@ Executar manualmente no Supabase SQL Editor:
 ```text
 database/001_create_companies.sql
 ...
-database/024_update_public_customer_link_expiration.sql
+database/026_add_estimated_wait_time.sql
 ```
 
 Script utilitario opcional:
@@ -1790,6 +1807,7 @@ Preserva:
 - [x] Telefone mascarado em pagina publica.
 - [x] Expiracao real do link apos `released_at`.
 - [x] Ocultacao de dados sensiveis apos expirar/cancelar/concluir.
+- [x] Estimativa de espera por empresa no link publico do cliente.
 - [x] Display publico por slug.
 - [x] Display publico com tema claro/escuro.
 - [x] Modo TV e fullscreen.
