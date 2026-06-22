@@ -27,7 +27,7 @@ export default async function PlatformUsersPage() {
     <>
       <PageHeader
         title="Equipe da Plataforma"
-        description="Usuarios da empresa proprietaria do SaaS."
+        description="Usuarios da empresa proprietaria do Sistema."
         action={<StatusBadge status={platformProfile.role} />}
       />
       <div className="grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">

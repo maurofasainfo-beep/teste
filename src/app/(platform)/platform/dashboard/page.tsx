@@ -54,23 +54,6 @@ export default async function PlatformDashboardPage() {
           />
         ))}
       </div>
-      <section className="mt-6 rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
-        <div className="flex items-start gap-4">
-          <div className="rounded-lg bg-primary/10 p-3 text-primary">
-            <Shield aria-hidden className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="text-base font-semibold text-foreground">
-              Administracao separada dos tenants
-            </h2>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-              A plataforma usa service role apenas no servidor depois de validar
-              o usuario em platform_profiles. Os usuarios clientes continuam
-              isolados por company_id e RLS.
-            </p>
-          </div>
-        </div>
-      </section>
     </>
   );
 }

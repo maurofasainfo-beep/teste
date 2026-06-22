@@ -98,14 +98,14 @@ export function LoginForm({ isConfigured }: LoginFormProps) {
             {pending ? "Aguarde" : mode === "login" ? "Entrar" : "Criar acesso"}
           </Button>
         </form>
-        <Button
+        {/* <Button
           className="mt-3 w-full"
           variant="ghost"
           type="button"
           onClick={() => setMode(mode === "login" ? "signup" : "login")}
         >
           {mode === "login" ? "Criar primeiro acesso" : "Já tenho acesso"}
-        </Button>
+        </Button> */}
       </CardContent>
     </Card>
   );
