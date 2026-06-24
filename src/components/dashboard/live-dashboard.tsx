@@ -143,7 +143,7 @@ export function LiveDashboard({
                     {entry.customer_name}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {entry.ticket_code} | {formatDateTime(entry.created_at)}
+                    {formatDateTime(entry.created_at)}
                   </p>
                 </div>
                 <div className="shrink-0">

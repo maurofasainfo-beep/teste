@@ -17,7 +17,6 @@ import {
   ListChecks,
   Loader2,
   Phone,
-  Ticket,
   UserPlus,
   UserRound,
   UsersRound,
@@ -198,10 +197,7 @@ export function OperationalBoard({
               </p>
               <div className="mt-3 rounded-lg bg-card p-3">
                 <p className="text-xs font-medium text-muted-foreground">
-                  Senha gerada
-                </p>
-                <p className="mt-1 font-mono text-lg font-semibold text-foreground">
-                  {createState.ticketCode}
+                  Link do cliente
                 </p>
                 <p className="mt-2 break-all text-xs text-muted-foreground">
                   {createState.customerLink}
@@ -320,18 +316,10 @@ function QueueCard({
               <Clock3 aria-hidden className="h-3.5 w-3.5" />
               {formatDateTime(entry.created_at)}
             </span>
+            {entry.position ? (
+              <span>Posicao {entry.position}</span>
+            ) : null}
           </div>
-        </div>
-        <div className="shrink-0 text-left sm:text-right">
-          <div className="inline-flex max-w-full items-center gap-2 rounded-lg bg-sidebar px-3 py-2 font-mono text-sm font-semibold text-white">
-            <Ticket aria-hidden className="h-4 w-4" />
-            <span className="truncate">{entry.ticket_code}</span>
-          </div>
-          {entry.position ? (
-            <p className="mt-2 text-xs font-medium text-muted-foreground">
-              Posicao {entry.position}
-            </p>
-          ) : null}
         </div>
       </div>
 

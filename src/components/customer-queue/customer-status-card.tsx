@@ -273,7 +273,6 @@ function CustomerDetails({
           </div>
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-          {entry.ticket_code ? <span>Codigo: {entry.ticket_code}</span> : null}
           <span>{entry.masked_customer_phone ?? "*****"}</span>
         </div>
       </section>

@@ -116,9 +116,6 @@ export function PublicDisplayBoard({
               <h2 className="mt-5 truncate text-4xl font-semibold tracking-normal sm:text-6xl lg:text-7xl">
                 {announcement.customer_name}
               </h2>
-              <p className="mt-6 inline-flex max-w-full break-all rounded-lg bg-primary px-5 py-3 font-mono text-2xl font-semibold text-primary-foreground sm:text-4xl lg:text-5xl">
-                {announcement.ticket_code}
-              </p>
             </motion.div>
           </motion.div>
         ) : null}
@@ -266,7 +263,7 @@ function DisplayColumn({
               key={entry.id}
               layout
             >
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
                 <div className="min-w-0">
                   <p
                     className={cn(
@@ -305,14 +302,6 @@ function DisplayColumn({
                     {entry.party_size === 1 ? "pessoa" : "pessoas"}
                   </p>
                 </div>
-                <p
-                  className={cn(
-                    "w-full max-w-full shrink-0 break-all rounded-lg bg-primary px-4 py-3 text-center font-mono font-semibold text-primary-foreground sm:w-auto",
-                    prominent || tvMode ? "text-2xl sm:text-3xl" : "text-lg sm:text-xl",
-                  )}
-                >
-                  {entry.ticket_code}
-                </p>
               </div>
             </motion.div>
           ))}
