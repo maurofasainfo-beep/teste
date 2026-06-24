@@ -88,8 +88,8 @@ export default async function SettingsPage() {
         action={<StatusBadge status={company.status} />}
       />
 
-      <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="rounded-lg border bg-card p-3 shadow-[var(--shadow-soft)]">
+      <div className="grid gap-5 xl:grid-cols-[300px_minmax(0,1fr)] xl:gap-6">
+        <aside className="hidden rounded-lg border bg-card p-3 shadow-[var(--shadow-soft)] xl:block">
           {sections.map((section) => {
             const Icon = section.icon;
             return (
@@ -114,8 +114,8 @@ export default async function SettingsPage() {
         </aside>
 
         <div className="space-y-6">
-          <section className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
-            <div className="flex items-start gap-4">
+          <section className="rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
               <div className="rounded-lg bg-primary/10 p-3 text-primary">
                 <Settings2 aria-hidden className="h-5 w-5" />
               </div>
@@ -126,11 +126,11 @@ export default async function SettingsPage() {
                 <p className="mt-1 text-sm text-muted-foreground">
                   Link usado por clientes finais e displays de TV.
                 </p>
-                <div className="mt-4 flex flex-col gap-3 rounded-lg border bg-background p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mt-4 flex flex-col gap-3 rounded-lg border bg-background p-4 lg:flex-row lg:items-center lg:justify-between">
                   <code className="break-all text-sm text-foreground">
                     /display/{company.public_queue_slug}
                   </code>
-                  <Button asChild variant="outline">
+                  <Button asChild className="w-full lg:w-auto" variant="outline">
                     <Link href={`/display/${company.public_queue_slug}`} target="_blank">
                       <ExternalLink aria-hidden className="h-4 w-4" />
                       Abrir
@@ -147,9 +147,9 @@ export default async function SettingsPage() {
             notificationChannel={notificationChannel}
           />
 
-          <section className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
+          <section className="rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-              <div className="flex items-start gap-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                 <div className="rounded-lg bg-primary/10 p-3 text-primary">
                   <TimerReset aria-hidden className="h-5 w-5" />
                 </div>
@@ -275,7 +275,7 @@ export default async function SettingsPage() {
           />
 
           <section className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
+            <div className="rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
               <h2 className="text-base font-semibold text-foreground">Empresa</h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 {company.trade_name}
@@ -284,7 +284,7 @@ export default async function SettingsPage() {
                 <StatusBadge status={company.status} />
               </div>
             </div>
-            <div className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
+            <div className="rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
               <h2 className="text-base font-semibold text-foreground">Mensageria</h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 Eventos registrados para envio por WhatsApp.

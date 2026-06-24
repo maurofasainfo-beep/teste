@@ -101,8 +101,8 @@ export function PublicPageBrandingPanel({
   }
 
   return (
-    <section className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
-      <div className="flex items-start gap-4">
+    <section className="rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
         <div className="rounded-lg bg-primary/10 p-3 text-primary">
           <Palette aria-hidden className="h-5 w-5" />
         </div>
@@ -208,7 +208,7 @@ export function PublicPageBrandingPanel({
           </p>
           <div
             aria-label="Preview do card publico de posicao"
-            className="relative flex aspect-[16/7] min-h-[170px] max-h-[220px] flex-col items-center justify-center overflow-hidden rounded-2xl bg-cover bg-center px-5 text-center shadow-[0_18px_40px_rgba(15,23,42,0.18)]"
+            className="relative flex aspect-[16/7] min-h-[150px] max-h-[220px] flex-col items-center justify-center overflow-hidden rounded-lg bg-cover bg-center px-5 text-center shadow-[0_18px_40px_rgba(15,23,42,0.14)]"
             role="img"
             style={{
               backgroundColor: previewBranding.primaryColor,
@@ -223,7 +223,7 @@ export function PublicPageBrandingPanel({
             <p className="text-xs font-semibold uppercase opacity-80">
               Posicao atual
             </p>
-            <p className="mt-2 text-6xl font-bold leading-none">1o</p>
+            <p className="mt-2 text-5xl font-bold leading-none sm:text-6xl">1o</p>
             <p className="mt-2 text-sm font-medium opacity-90">
               na fila de espera
             </p>
@@ -283,7 +283,7 @@ function SubmitButton({
   const { pending } = useFormStatus();
 
   return (
-    <Button disabled={pending} type="submit" variant={variant}>
+    <Button className="w-full sm:w-auto" disabled={pending} type="submit" variant={variant}>
       {pending ? (
         <Loader2 aria-hidden className="h-4 w-4 animate-spin" />
       ) : (

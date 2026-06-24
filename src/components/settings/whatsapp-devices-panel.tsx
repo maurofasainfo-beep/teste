@@ -53,9 +53,9 @@ export function WhatsAppDevicesPanel({
   );
 
   return (
-    <section className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
+    <section className="rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
       <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-        <div className="flex items-start gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
           <div className="rounded-lg bg-primary/10 p-3 text-primary">
             <PlugZap aria-hidden className="h-5 w-5" />
           </div>
@@ -88,7 +88,7 @@ export function WhatsAppDevicesPanel({
         </form>
       </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
+      <div className="mt-5 grid gap-5 xl:mt-6 xl:grid-cols-[340px_minmax(0,1fr)]">
         <div className="rounded-lg border bg-background p-4">
           <h3 className="text-sm font-semibold text-foreground">Novo dispositivo</h3>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -153,15 +153,15 @@ export function WhatsAppDevicesPanel({
               {logs.map((log) => (
                 <div className="py-3" key={log.id}>
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-medium text-foreground">
+                    <p className="break-words text-sm font-medium text-foreground">
                       {log.event_type}
                     </p>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="shrink-0 text-xs text-muted-foreground">
                       {formatDateTime(log.created_at)}
                     </span>
                   </div>
                   {log.message ? (
-                    <p className="mt-1 text-sm text-muted-foreground">{log.message}</p>
+                    <p className="mt-1 break-words text-sm text-muted-foreground">{log.message}</p>
                   ) : null}
                 </div>
               ))}
@@ -219,17 +219,27 @@ function DeviceCard({ device }: { device: WhatsAppDevice }) {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 lg:justify-end">
+        <div className="grid gap-2 sm:grid-cols-2 lg:flex lg:flex-wrap lg:justify-end">
           {!device.is_primary_sender && device.status !== "revoked" ? (
             <form action={setPrimaryWhatsAppDeviceAction}>
               <input name="device_id" type="hidden" value={device.id} />
-              <SubmitButton icon={RadioTower} label="Definir primary" variant="outline" />
+              <SubmitButton
+                className="w-full"
+                icon={RadioTower}
+                label="Definir primary"
+                variant="outline"
+              />
             </form>
           ) : null}
           {device.status !== "revoked" ? (
             <form action={revokeWhatsAppDeviceAction}>
               <input name="device_id" type="hidden" value={device.id} />
-              <SubmitButton icon={PowerOff} label="Revogar" variant="destructive" />
+              <SubmitButton
+                className="w-full"
+                icon={PowerOff}
+                label="Revogar"
+                variant="destructive"
+              />
             </form>
           ) : null}
         </div>

@@ -34,7 +34,7 @@ export default async function PlatformCompaniesPage() {
         }
       />
       <section className="rounded-lg border bg-card shadow-[var(--shadow-soft)]">
-        <div className="grid grid-cols-12 gap-4 border-b px-5 py-3 text-xs font-semibold uppercase text-muted-foreground">
+        <div className="hidden grid-cols-12 gap-4 border-b px-5 py-3 text-xs font-semibold uppercase text-muted-foreground md:grid">
           <span className="col-span-5">Empresa</span>
           <span className="col-span-2 hidden lg:block">CNPJ</span>
           <span className="col-span-2 hidden md:block">Status</span>
@@ -43,7 +43,7 @@ export default async function PlatformCompaniesPage() {
         <div className="divide-y">
           {(companies ?? []).map((company) => (
             <Link
-              className="grid grid-cols-12 gap-4 px-5 py-4 transition-colors hover:bg-secondary/70"
+              className="grid grid-cols-12 gap-4 px-4 py-4 transition-colors hover:bg-secondary/70 sm:px-5"
               href={`/platform/companies/${company.id}`}
               key={company.id}
             >
@@ -58,6 +58,15 @@ export default async function PlatformCompaniesPage() {
                   <p className="truncate text-xs text-muted-foreground">
                     {company.trade_name}
                   </p>
+                  <div className="mt-3 flex flex-wrap items-center gap-2 md:hidden">
+                    <StatusBadge status={company.status} />
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {company.cnpj}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {formatDateTime(company.created_at)}
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="col-span-2 hidden items-center font-mono text-sm text-muted-foreground lg:flex">

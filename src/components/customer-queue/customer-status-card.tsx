@@ -110,16 +110,16 @@ export function CustomerStatusCard({
   );
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-[430px] items-center px-3 py-3 sm:px-4 sm:py-5">
+    <div className="mx-auto flex min-h-screen w-full max-w-[340px] min-w-0 items-center overflow-hidden py-3 sm:max-w-[430px] sm:py-5">
       <motion.section
         animate={{ opacity: 1, y: 0 }}
-        className="w-full overflow-hidden rounded-[2rem] border border-border/70 bg-card shadow-[0_24px_60px_rgba(15,23,42,0.12)]"
+        className="w-full min-w-0 max-w-full overflow-hidden rounded-lg border border-border/70 bg-card shadow-[0_18px_44px_rgba(15,23,42,0.10)]"
         initial={{ opacity: 0, y: 16 }}
         transition={{ duration: 0.25 }}
       >
         <header className="flex items-center justify-between gap-3 px-4 py-3">
           <div
-            className="flex h-9 w-9 items-center justify-center rounded-full"
+            className="flex h-9 w-9 items-center justify-center rounded-lg"
             style={{
               backgroundColor: hexToRgba(branding.primaryColor, 0.1),
               color: branding.primaryColor,
@@ -138,7 +138,7 @@ export function CustomerStatusCard({
           {canRefresh ? (
             <Button
               aria-label="Atualizar"
-              className="h-9 w-9 rounded-full p-0"
+              className="h-9 w-9 rounded-lg p-0"
               disabled={refreshing}
               size="icon"
               type="button"
@@ -184,12 +184,12 @@ export function CustomerStatusCard({
           ) : null}
 
           {viewStatus === "released" && remainingSeconds !== null ? (
-            <div className="rounded-2xl border border-success/30 bg-success/10 px-4 py-3 text-center text-xs font-semibold text-foreground">
+            <div className="rounded-lg border border-success/30 bg-success/10 px-4 py-3 text-center text-xs font-semibold text-foreground">
               Tempo restante do link: {formatRemainingTime(remainingSeconds)}
             </div>
           ) : null}
 
-          <div className="flex items-center justify-between gap-3 border-t border-border/70 pt-3">
+          <div className="flex flex-col gap-3 border-t border-border/70 pt-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-[11px] leading-4 text-muted-foreground">
               {viewStatus === "expired"
                 ? "Dados do atendimento foram ocultados apos a expiracao."
@@ -197,7 +197,7 @@ export function CustomerStatusCard({
             </p>
             {canRefresh ? (
               <Button
-                className="h-8 rounded-full px-3 text-[11px]"
+                className="h-9 w-full rounded-lg px-3 text-[11px] sm:w-auto"
                 disabled={refreshing}
                 size="sm"
                 type="button"
@@ -231,7 +231,7 @@ function CustomerDetails({
   return (
     <div className="space-y-3">
       <section
-        className="relative flex aspect-[16/7] min-h-[170px] max-h-[220px] flex-col items-center justify-center overflow-hidden rounded-[1.75rem] bg-cover bg-center px-5 text-center shadow-[0_18px_40px_rgba(15,23,42,0.22)]"
+        className="relative flex aspect-[16/7] min-h-[150px] max-h-[220px] flex-col items-center justify-center overflow-hidden rounded-lg bg-cover bg-center px-5 text-center shadow-[0_18px_36px_rgba(15,23,42,0.18)]"
         style={{
           backgroundColor: branding.primaryColor,
           backgroundImage: buildPositionCardBackground(branding),
@@ -239,10 +239,10 @@ function CustomerDetails({
           textShadow: "0 1px 4px rgba(15, 23, 42, 0.55)",
         }}
       >
-        <p className="relative text-xs font-semibold uppercase tracking-[0.18em] opacity-80">
+        <p className="relative text-xs font-semibold uppercase tracking-normal opacity-80">
           {viewStatus === "released" ? "Voce foi chamado" : "Posicao atual"}
         </p>
-        <p className="relative mt-2 text-6xl font-bold leading-none tracking-normal">
+        <p className="relative mt-2 text-5xl font-bold leading-none tracking-normal sm:text-6xl">
           {positionText}
         </p>
         <p className="relative mt-2 text-sm font-medium opacity-90">
@@ -250,22 +250,22 @@ function CustomerDetails({
         </p>
       </section>
 
-      <section className="rounded-[1.5rem] border border-border/70 bg-background p-4">
+      <section className="rounded-lg border border-border/70 bg-background p-4">
         <div className="flex items-start gap-3">
           <div
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-sm font-bold text-white"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white"
             style={{ backgroundColor: branding.primaryColor }}
           >
             {getCompanyInitial(entry.company_trade_name)}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
               <p className="truncate text-sm font-semibold text-foreground">
                 {entry.company_trade_name}
               </p>
               <StatusBadge className="shrink-0 text-[10px]" status={entry.status} />
             </div>
-            <p className="mt-1 text-sm leading-5 text-muted-foreground">
+            <p className="mt-1 break-words text-sm leading-5 text-muted-foreground">
               {entry.customer_name ?? "Cliente"}, voce esta em{" "}
               <span className="font-semibold text-foreground">{positionText}</span>{" "}
               na fila para {peopleText}.
@@ -295,14 +295,14 @@ function CustomerDetails({
 
       {viewStatus === "waiting" && entry.estimated_wait_available ? (
         <section
-          className="flex items-center gap-3 rounded-2xl border px-4 py-3"
+          className="flex items-center gap-3 rounded-lg border px-4 py-3"
           style={{
             backgroundColor: hexToRgba(branding.primaryColor, 0.06),
             borderColor: hexToRgba(branding.primaryColor, 0.22),
           }}
         >
           <div
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white"
             style={{ backgroundColor: branding.primaryColor }}
           >
             <Clock3 aria-hidden className="h-5 w-5" />
@@ -321,7 +321,7 @@ function CustomerDetails({
         </section>
       ) : null}
 
-      <p className="px-1 text-center text-xs leading-5 text-muted-foreground">
+      <p className="break-words px-1 text-center text-xs leading-5 text-muted-foreground">
         {viewStatus === "released"
           ? "Compareca ao atendimento agora."
           : "Acompanhe este link. Ele atualiza quando sua vez chegar."}
@@ -345,7 +345,7 @@ function StatusOnly({
     <div className="space-y-3">
       <section
         className={cn(
-          "flex h-[172px] flex-col items-center justify-center rounded-[1.75rem] px-5 text-center",
+          "flex h-[160px] flex-col items-center justify-center rounded-lg px-5 text-center",
           viewStatus === "expired" && "bg-warning/10 text-warning",
           viewStatus === "cancelled" && "bg-danger/10 text-danger",
           viewStatus === "completed" && "bg-primary/10 text-primary",
@@ -359,7 +359,7 @@ function StatusOnly({
             : undefined
         }
       >
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-card shadow-sm">
+        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-card shadow-sm">
           <Icon aria-hidden className="h-6 w-6" />
         </div>
         <h2 className="mt-4 text-xl font-semibold tracking-normal text-foreground">
@@ -383,7 +383,7 @@ function InfoItem({
   value: string;
 }) {
   return (
-    <div className="min-w-0 rounded-2xl border border-border/70 bg-background px-3 py-2.5">
+    <div className="min-w-0 rounded-lg border border-border/70 bg-background px-3 py-2.5">
       <p className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
         <Icon aria-hidden className="h-3.5 w-3.5" />
         {label}
@@ -447,7 +447,7 @@ function getPositionText(entry: PublicCustomerQueueEntry) {
     return "Agora";
   }
 
-  return `${entry.position}º`;
+  return `${entry.position}o`;
 }
 
 function getCompanyInitial(name: string) {

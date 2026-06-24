@@ -21,7 +21,7 @@ type LoginFormProps = {
 
 export function LoginForm({ isConfigured }: LoginFormProps) {
   const router = useRouter();
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode] = useState<"login" | "signup">("login");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 

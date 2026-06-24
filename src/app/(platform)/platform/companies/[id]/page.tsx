@@ -77,8 +77,8 @@ export default async function PlatformCompanyDetailPage({
         }
       />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-        <section className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-6">
+        <section className="rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
           <div className="mb-5 flex items-center gap-3">
             <div className="rounded-lg bg-primary/10 p-2 text-primary">
               <Building2 aria-hidden className="h-5 w-5" />
@@ -167,21 +167,21 @@ export default async function PlatformCompanyDetailPage({
           </form>
         </section>
 
-        <aside className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
+        <aside className="rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
           <StatusBadge status={company.status} />
           <h2 className="mt-4 text-lg font-semibold text-foreground">
             {company.corporate_name}
           </h2>
           <div className="mt-5 space-y-3 text-sm">
-            <div className="flex items-center justify-between gap-3 rounded-lg border p-3">
+            <div className="flex flex-col gap-1 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
               <span className="text-muted-foreground">Criada em</span>
               <span>{formatDateTime(company.created_at)}</span>
             </div>
-            <div className="flex items-center justify-between gap-3 rounded-lg border p-3">
+            <div className="flex flex-col gap-1 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
               <span className="text-muted-foreground">Usuarios</span>
               <span>{profiles?.length ?? 0}</span>
             </div>
-            <div className="flex items-center justify-between gap-3 rounded-lg border p-3">
+            <div className="flex flex-col gap-1 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
               <span className="text-muted-foreground">Display</span>
               <span className="truncate font-mono text-xs">
                 {company.public_queue_slug}
@@ -191,7 +191,7 @@ export default async function PlatformCompanyDetailPage({
         </aside>
       </div>
 
-      <section className="mt-6 rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
+      <section className="mt-5 rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] sm:mt-6 sm:p-5">
         <div className="mb-5 flex items-center gap-3">
           <div className="rounded-lg bg-primary/10 p-2 text-primary">
             <UsersRound aria-hidden className="h-5 w-5" />
@@ -216,7 +216,7 @@ export default async function PlatformCompanyDetailPage({
               {canReset ? (
                 <form
                   action={resetClientUserAccessAction}
-                  className="flex flex-col gap-2 sm:flex-row"
+                  className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]"
                 >
                   <input type="hidden" name="user_id" value={profile.user_id} />
                   <Input
@@ -227,7 +227,7 @@ export default async function PlatformCompanyDetailPage({
                     placeholder="Senha temporaria"
                     required
                   />
-                  <Button type="submit" variant="outline">
+                  <Button className="w-full sm:w-auto" type="submit" variant="outline">
                     <KeyRound aria-hidden className="h-4 w-4" />
                     Resetar
                   </Button>

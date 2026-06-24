@@ -6,8 +6,8 @@ type PageHeaderProps = {
 
 export function PageHeader({ title, description, action }: PageHeaderProps) {
   return (
-    <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-      <div>
+    <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+      <div className="min-w-0">
         <h1 className="text-2xl font-semibold tracking-normal text-foreground sm:text-3xl">
           {title}
         </h1>
@@ -17,7 +17,7 @@ export function PageHeader({ title, description, action }: PageHeaderProps) {
           </p>
         ) : null}
       </div>
-      {action}
+      {action ? <div className="shrink-0 sm:pt-1">{action}</div> : null}
     </div>
   );
 }

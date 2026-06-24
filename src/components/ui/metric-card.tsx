@@ -29,14 +29,14 @@ export function MetricCard({
   return (
     <section
       className={cn(
-        "rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-panel)]",
+        "rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] transition-all motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-[var(--shadow-panel)] sm:p-5",
         className,
       )}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-sm font-medium text-muted-foreground">{label}</p>
-          <p className="mt-3 text-3xl font-semibold tracking-normal text-foreground">
+          <p className="mt-2 text-2xl font-semibold tracking-normal text-foreground sm:mt-3 sm:text-3xl">
             {value}
           </p>
         </div>
@@ -44,7 +44,7 @@ export function MetricCard({
           <Icon aria-hidden className="h-5 w-5" />
         </div>
       </div>
-      {detail ? <p className="mt-4 text-xs text-muted-foreground">{detail}</p> : null}
+      {detail ? <p className="mt-3 text-xs text-muted-foreground sm:mt-4">{detail}</p> : null}
     </section>
   );
 }

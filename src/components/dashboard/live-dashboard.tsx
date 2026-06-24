@@ -116,7 +116,7 @@ export function LiveDashboard({
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
-        <section className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
+        <section className="rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-base font-semibold text-foreground">
@@ -133,7 +133,7 @@ export function LiveDashboard({
             {recentEntries.map((entry) => (
               <motion.div
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center justify-between gap-4 rounded-lg border bg-background p-4"
+                className="flex flex-col gap-3 rounded-lg border bg-background p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                 initial={{ opacity: 0, y: 8 }}
                 key={entry.id}
                 layout
@@ -146,7 +146,9 @@ export function LiveDashboard({
                     {entry.ticket_code} | {formatDateTime(entry.created_at)}
                   </p>
                 </div>
-                <StatusBadge status={entry.status} />
+                <div className="shrink-0">
+                  <StatusBadge status={entry.status} />
+                </div>
               </motion.div>
             ))}
 
@@ -160,7 +162,7 @@ export function LiveDashboard({
           </div>
         </section>
 
-        <section className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
+        <section className="rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
           <h2 className="text-base font-semibold text-foreground">
             Saude operacional
           </h2>

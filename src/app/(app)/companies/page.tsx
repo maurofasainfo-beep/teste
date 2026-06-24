@@ -59,8 +59,8 @@ export default async function CompaniesPage() {
         />
       </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
+      <div className="mt-5 grid gap-5 xl:mt-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-6">
+        <section className="rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
           <div className="mb-5">
             <h2 className="text-base font-semibold text-foreground">
               Dados cadastrais
@@ -122,9 +122,9 @@ export default async function CompaniesPage() {
                 required
               />
             </div>
-            <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row">
-              <Button type="submit">Salvar empresa</Button>
-              <Button asChild variant="outline">
+            <div className="grid gap-3 sm:col-span-2 sm:grid-cols-2 lg:flex">
+              <Button className="w-full lg:w-auto" type="submit">Salvar empresa</Button>
+              <Button asChild className="w-full lg:w-auto" variant="outline">
                 <Link href={`/display/${company.public_queue_slug}`} target="_blank">
                   <ExternalLink aria-hidden className="h-4 w-4" />
                   Abrir display
@@ -134,7 +134,7 @@ export default async function CompaniesPage() {
           </form>
         </section>
 
-        <aside className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
+        <aside className="rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
           <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <ShieldCheck aria-hidden className="h-7 w-7" />
           </div>
@@ -145,17 +145,17 @@ export default async function CompaniesPage() {
             {company.corporate_name}
           </p>
           <div className="mt-5 space-y-3 text-sm">
-            <div className="flex items-center justify-between gap-3 rounded-lg border p-3">
+            <div className="flex flex-col gap-1 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
               <span className="text-muted-foreground">Status</span>
               <StatusBadge status={company.status} />
             </div>
-            <div className="flex items-center justify-between gap-3 rounded-lg border p-3">
+            <div className="flex flex-col gap-1 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
               <span className="text-muted-foreground">Display</span>
               <span className="truncate font-mono text-xs">
                 {company.public_queue_slug}
               </span>
             </div>
-            <div className="flex items-center justify-between gap-3 rounded-lg border p-3">
+            <div className="flex flex-col gap-1 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
               <span className="text-muted-foreground">Telefone</span>
               <span>{companyPhone || "-"}</span>
             </div>

@@ -71,7 +71,7 @@ export function TemplateWorkspace({
 
           return (
             <section
-              className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-panel)]"
+              className="rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] transition-all motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-[var(--shadow-panel)] sm:p-5"
               key={type.value}
             >
               <div className="flex items-start justify-between gap-4">
@@ -98,11 +98,16 @@ export function TemplateWorkspace({
                 </p>
               </div>
 
-              <div className="mt-5 flex items-center justify-between gap-3">
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <span className="font-mono text-xs text-muted-foreground">
                   {type.value}
                 </span>
-                <Button type="button" variant="outline" onClick={() => setSelectedType(type.value)}>
+                <Button
+                  className="w-full sm:w-auto"
+                  type="button"
+                  variant="outline"
+                  onClick={() => setSelectedType(type.value)}
+                >
                   <Edit3 aria-hidden className="h-4 w-4" />
                   Editar
                 </Button>
@@ -112,7 +117,7 @@ export function TemplateWorkspace({
         })}
       </div>
 
-      <section className="mt-6 rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
+      <section className="mt-5 rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] sm:mt-6 sm:p-5">
         <div className="flex items-center gap-3">
           <div className="rounded-lg bg-primary/10 p-2 text-primary">
             <Sparkles aria-hidden className="h-5 w-5" />
@@ -160,7 +165,7 @@ export function TemplateWorkspace({
             <div className="space-y-2">
               <Label htmlFor={`content-${selectedConfig.value}`}>Conteudo</Label>
               <Textarea
-                className="min-h-56"
+                className="min-h-48 sm:min-h-56"
                 id={`content-${selectedConfig.value}`}
                 name="content"
                 defaultValue={

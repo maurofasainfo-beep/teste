@@ -28,13 +28,13 @@ export function Drawer({ open, title, description, children, onClose }: DrawerPr
           />
           <motion.aside
             aria-modal="true"
-            className="absolute right-0 top-0 flex h-full w-full max-w-xl flex-col border-l bg-card shadow-[var(--shadow-panel)]"
+            className="absolute right-0 top-0 flex h-full w-[min(100vw,36rem)] flex-col border-l bg-card shadow-[var(--shadow-panel)]"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ duration: 0.24, ease: "easeOut" }}
           >
-            <div className="flex items-start justify-between gap-4 border-b p-5">
+            <div className="flex items-start justify-between gap-4 border-b p-4 sm:p-5">
               <div>
                 <h2 className="text-lg font-semibold text-foreground">{title}</h2>
                 {description ? (
@@ -45,7 +45,7 @@ export function Drawer({ open, title, description, children, onClose }: DrawerPr
                 <X aria-hidden className="h-4 w-4" />
               </Button>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto p-5">{children}</div>
+            <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">{children}</div>
           </motion.aside>
         </div>
       ) : null}

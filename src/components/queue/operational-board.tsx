@@ -142,8 +142,8 @@ export function OperationalBoard({
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
-        <section className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
+      <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[360px_minmax(0,1fr)]">
+        <section className="rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
           <div className="mb-5">
             <h2 className="text-base font-semibold text-foreground">Novo cliente</h2>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -222,7 +222,7 @@ export function OperationalBoard({
           ) : null}
         </section>
 
-        <div className="grid gap-6 2xl:grid-cols-2">
+        <div className="grid gap-5 xl:grid-cols-2">
           <QueueColumn
             entries={waiting}
             title="Na fila"
@@ -249,7 +249,7 @@ function QueueColumn({
   variant: "waiting" | "released";
 }) {
   return (
-    <section className="min-h-[520px] rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)]">
+    <section className="min-h-[320px] rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] sm:min-h-[420px] xl:min-h-[520px]">
       <div className="mb-4 flex items-center justify-between gap-3 px-1">
         <div>
           <h2 className="text-base font-semibold text-foreground">{title}</h2>
@@ -270,7 +270,7 @@ function QueueColumn({
         </AnimatePresence>
         {entries.length === 0 ? (
           <EmptyState
-            className="min-h-72"
+            className="min-h-52 sm:min-h-72"
             icon={UserRound}
             title="Nenhum cliente"
             description="Novas entradas aparecem aqui automaticamente."
@@ -292,14 +292,14 @@ function QueueCard({
     <motion.article
       animate={{ opacity: 1, scale: 1, y: 0 }}
       className={cn(
-        "rounded-lg border bg-background p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:bg-card hover:shadow-[var(--shadow-soft)]",
+        "rounded-lg border bg-background p-4 shadow-sm transition-all motion-safe:hover:-translate-y-0.5 motion-safe:hover:border-primary/30 motion-safe:hover:bg-card motion-safe:hover:shadow-[var(--shadow-soft)]",
         variant === "released" && "border-success/30 bg-success/5",
       )}
       exit={{ opacity: 0, scale: 0.98, y: -8 }}
       initial={{ opacity: 0, scale: 0.98, y: 8 }}
       layout
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <p className="truncate text-base font-semibold text-foreground">
@@ -322,10 +322,10 @@ function QueueCard({
             </span>
           </div>
         </div>
-        <div className="shrink-0 text-right">
-          <div className="inline-flex items-center gap-2 rounded-lg bg-sidebar px-3 py-2 font-mono text-sm font-semibold text-white">
+        <div className="shrink-0 text-left sm:text-right">
+          <div className="inline-flex max-w-full items-center gap-2 rounded-lg bg-sidebar px-3 py-2 font-mono text-sm font-semibold text-white">
             <Ticket aria-hidden className="h-4 w-4" />
-            {entry.ticket_code}
+            <span className="truncate">{entry.ticket_code}</span>
           </div>
           {entry.position ? (
             <p className="mt-2 text-xs font-medium text-muted-foreground">
@@ -335,25 +335,36 @@ function QueueCard({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <CustomerLinkActions
+          className="w-full lg:w-auto"
           customerLink={buildCustomerQueueLink(entry.public_customer_token)}
           compact
         />
-        <div className="flex flex-wrap justify-end gap-2">
+        <div className="grid w-full gap-2 sm:grid-cols-3 lg:w-auto lg:flex lg:flex-wrap lg:justify-end">
         {variant === "waiting" ? (
-          <form action={releaseQueueEntryAction}>
+          <form action={releaseQueueEntryAction} className="min-w-0">
             <input type="hidden" name="queue_entry_id" value={entry.id} />
-            <SubmitButton icon={BellRing} label="Chamar" />
+            <SubmitButton className="w-full" icon={BellRing} label="Chamar" />
           </form>
         ) : null}
-        <form action={completeQueueEntryAction}>
+        <form action={completeQueueEntryAction} className="min-w-0">
           <input type="hidden" name="queue_entry_id" value={entry.id} />
-          <SubmitButton icon={Check} label="Concluir" variant="secondary" />
+          <SubmitButton
+            className="w-full"
+            icon={Check}
+            label="Concluir"
+            variant="secondary"
+          />
         </form>
-        <form action={cancelQueueEntryAction}>
+        <form action={cancelQueueEntryAction} className="min-w-0">
           <input type="hidden" name="queue_entry_id" value={entry.id} />
-          <SubmitButton icon={X} label="Cancelar" variant="destructive" />
+          <SubmitButton
+            className="w-full"
+            icon={X}
+            label="Cancelar"
+            variant="destructive"
+          />
         </form>
         </div>
       </div>

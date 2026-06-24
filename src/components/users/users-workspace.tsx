@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { Loader2, Search, UserPlus, UsersRound } from "lucide-react";
+import { Loader2, Save, Search, UserPlus, UsersRound } from "lucide-react";
 import { createUserAction, updateUserAction } from "@/app/actions";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -48,8 +48,8 @@ export function UsersWorkspace({ profiles }: UsersWorkspaceProps) {
   const active = profiles.filter((profile) => profile.status === "active").length;
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
-      <section className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
+    <div className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
+      <section className="rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
         <div className="mb-5">
           <h2 className="text-base font-semibold text-foreground">Novo usuario</h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -116,55 +116,94 @@ export function UsersWorkspace({ profiles }: UsersWorkspaceProps) {
           </div>
         </div>
 
-        <div className="p-2 sm:p-5">
+        <div className="p-3 sm:p-5">
           {filteredProfiles.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Usuario</TableHead>
-                  <TableHead>Perfil</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Ultimo acesso</TableHead>
-                  <TableHead className="text-right">Acoes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              <div className="grid gap-3 lg:hidden">
                 {filteredProfiles.map((profile) => (
-                  <TableRow key={profile.id}>
-                    <TableCell>
+                  <article
+                    className="rounded-lg border bg-background p-4"
+                    key={profile.id}
+                  >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <Avatar label={profile.email} name={profile.name} />
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={profile.role} />
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={profile.status} />
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      Nao registrado
-                    </TableCell>
-                    <TableCell>
-                      <form action={updateUserAction} className="flex justify-end gap-2">
-                        <input type="hidden" name="profile_id" value={profile.id} />
-                        <Select name="role" defaultValue={profile.role} className="w-32">
-                          <option value="employee">Employee</option>
-                          <option value="admin">Admin</option>
-                        </Select>
-                        <Select
-                          name="status"
-                          defaultValue={profile.status}
-                          className="w-28"
-                        >
-                          <option value="active">Ativo</option>
-                          <option value="inactive">Inativo</option>
-                        </Select>
-                        <SubmitButton label="Salvar" variant="outline" />
-                      </form>
-                    </TableCell>
-                  </TableRow>
+                      <div className="flex flex-wrap gap-2">
+                        <StatusBadge status={profile.role} />
+                        <StatusBadge status={profile.status} />
+                      </div>
+                    </div>
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      Ultimo acesso: Nao registrado
+                    </p>
+                    <form
+                      action={updateUserAction}
+                      className="mt-4 grid gap-2 sm:grid-cols-[1fr_1fr_auto]"
+                    >
+                      <input type="hidden" name="profile_id" value={profile.id} />
+                      <Select name="role" defaultValue={profile.role}>
+                        <option value="employee">Employee</option>
+                        <option value="admin">Admin</option>
+                      </Select>
+                      <Select name="status" defaultValue={profile.status}>
+                        <option value="active">Ativo</option>
+                        <option value="inactive">Inativo</option>
+                      </Select>
+                      <SubmitButton label="Salvar" variant="outline" />
+                    </form>
+                  </article>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+
+              <div className="hidden lg:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Usuario</TableHead>
+                      <TableHead>Perfil</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Ultimo acesso</TableHead>
+                      <TableHead className="text-right">Acoes</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredProfiles.map((profile) => (
+                      <TableRow key={profile.id}>
+                        <TableCell>
+                          <Avatar label={profile.email} name={profile.name} />
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge status={profile.role} />
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge status={profile.status} />
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          Nao registrado
+                        </TableCell>
+                        <TableCell>
+                          <form action={updateUserAction} className="flex justify-end gap-2">
+                            <input type="hidden" name="profile_id" value={profile.id} />
+                            <Select name="role" defaultValue={profile.role} className="w-32">
+                              <option value="employee">Employee</option>
+                              <option value="admin">Admin</option>
+                            </Select>
+                            <Select
+                              name="status"
+                              defaultValue={profile.status}
+                              className="w-28"
+                            >
+                              <option value="active">Ativo</option>
+                              <option value="inactive">Inativo</option>
+                            </Select>
+                            <SubmitButton label="Salvar" variant="outline" />
+                          </form>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           ) : (
             <EmptyState
               icon={UsersRound}
@@ -186,13 +225,14 @@ function SubmitButton({
   variant?: "default" | "outline";
 }) {
   const { pending } = useFormStatus();
+  const Icon = label.toLowerCase().startsWith("criar") ? UserPlus : Save;
 
   return (
     <Button className="w-full sm:w-auto" disabled={pending} type="submit" variant={variant}>
       {pending ? (
         <Loader2 aria-hidden className="h-4 w-4 animate-spin" />
       ) : (
-        <UserPlus aria-hidden className="h-4 w-4" />
+        <Icon aria-hidden className="h-4 w-4" />
       )}
       {pending ? "Processando" : label}
     </Button>

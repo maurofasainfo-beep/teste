@@ -26,8 +26,9 @@ export function CustomerLinkActions({
   }
 
   return (
-    <div className={cn("flex flex-wrap gap-2", className)}>
+    <div className={cn("grid grid-cols-2 gap-2 sm:flex sm:flex-wrap", className)}>
       <Button
+        className="w-full sm:w-auto"
         size={compact ? "sm" : "default"}
         type="button"
         variant="outline"
@@ -40,7 +41,12 @@ export function CustomerLinkActions({
         )}
         {copied ? "Copiado" : "Copiar link"}
       </Button>
-      <Button asChild size={compact ? "sm" : "default"} variant="secondary">
+      <Button
+        asChild
+        className="w-full sm:w-auto"
+        size={compact ? "sm" : "default"}
+        variant="secondary"
+      >
         <Link href={customerLink} target="_blank">
           <ExternalLink aria-hidden className="h-4 w-4" />
           Abrir link

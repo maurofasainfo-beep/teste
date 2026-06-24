@@ -31,7 +31,7 @@ export function LeaveQueueDialog({ token, onLeft }: LeaveQueueDialogProps) {
   return (
     <>
       <Button
-        className="h-11 w-full rounded-full text-sm"
+        className="h-11 w-full rounded-lg text-sm"
         type="button"
         variant="destructive"
         onClick={() => setOpen(true)}
@@ -77,6 +77,7 @@ export function LeaveQueueDialog({ token, onLeft }: LeaveQueueDialogProps) {
               ) : null}
               <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 <Button
+                  className="w-full sm:w-auto"
                   type="button"
                   variant="outline"
                   onClick={() => setOpen(false)}
@@ -97,7 +98,7 @@ function ConfirmButton() {
   const { pending } = useFormStatus();
 
   return (
-    <Button disabled={pending} type="submit" variant="destructive">
+    <Button className="w-full sm:w-auto" disabled={pending} type="submit" variant="destructive">
       {pending ? (
         <Loader2 aria-hidden className="h-4 w-4 animate-spin" />
       ) : (

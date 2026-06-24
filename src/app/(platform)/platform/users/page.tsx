@@ -30,9 +30,9 @@ export default async function PlatformUsersPage() {
         description="Usuarios da empresa proprietaria do Sistema."
         action={<StatusBadge status={platformProfile.role} />}
       />
-      <div className="grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
+      <div className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
         {canManage ? (
-          <section className="rounded-lg border bg-card p-5 shadow-[var(--shadow-soft)]">
+          <section className="rounded-lg border bg-card p-4 shadow-[var(--shadow-soft)] sm:p-5">
             <div className="mb-5">
               <h2 className="text-base font-semibold text-foreground">
                 Novo usuario da plataforma
@@ -91,7 +91,7 @@ export default async function PlatformUsersPage() {
           <div className="divide-y">
             {(users ?? []).map((user) => (
               <div
-                className="grid gap-4 p-5 lg:grid-cols-[minmax(0,1fr)_auto]"
+                className="grid gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_auto]"
                 key={user.id}
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -102,9 +102,9 @@ export default async function PlatformUsersPage() {
                   </div>
                 </div>
                 {canManage ? (
-                  <form action={updatePlatformUserAction} className="flex flex-col gap-2 sm:flex-row">
+                  <form action={updatePlatformUserAction} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto] lg:flex lg:flex-row">
                     <input type="hidden" name="platform_profile_id" value={user.id} />
-                    <Select name="role" defaultValue={user.role} className="sm:w-32">
+                    <Select name="role" defaultValue={user.role} className="lg:w-32">
                       <option value="owner">Owner</option>
                       <option value="admin">Admin</option>
                       <option value="support">Support</option>
@@ -112,12 +112,12 @@ export default async function PlatformUsersPage() {
                     <Select
                       name="status"
                       defaultValue={user.status}
-                      className="sm:w-32"
+                      className="lg:w-32"
                     >
                       <option value="active">Ativo</option>
                       <option value="inactive">Inativo</option>
                     </Select>
-                    <Button type="submit" variant="outline">
+                    <Button className="w-full lg:w-auto" type="submit" variant="outline">
                       Salvar
                     </Button>
                   </form>

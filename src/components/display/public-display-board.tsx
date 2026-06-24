@@ -84,7 +84,7 @@ export function PublicDisplayBoard({
   return (
     <div
       className={cn(
-        "min-h-screen overflow-hidden p-4 transition-colors sm:p-6 lg:p-8",
+        "min-h-screen overflow-x-hidden p-3 transition-colors sm:p-5 lg:p-8",
         dark ? "bg-[#07111f] text-white" : "bg-background text-foreground",
         tvMode && "p-3 sm:p-4 lg:p-6",
       )}
@@ -100,7 +100,7 @@ export function PublicDisplayBoard({
           >
             <motion.div
               className={cn(
-                "display-glow w-full max-w-4xl rounded-lg border p-8 text-center shadow-[var(--shadow-panel)] sm:p-12",
+                "display-glow w-full max-w-4xl rounded-lg border p-6 text-center shadow-[var(--shadow-panel)] sm:p-10 lg:p-12",
                 dark
                   ? "border-success/40 bg-[#0b1727] text-white"
                   : "border-success/40 bg-card text-foreground",
@@ -113,10 +113,10 @@ export function PublicDisplayBoard({
               <p className="text-sm font-semibold uppercase tracking-normal text-success">
                 Cliente liberado
               </p>
-              <h2 className="mt-5 truncate text-5xl font-semibold tracking-normal sm:text-7xl">
+              <h2 className="mt-5 truncate text-4xl font-semibold tracking-normal sm:text-6xl lg:text-7xl">
                 {announcement.customer_name}
               </h2>
-              <p className="mt-6 inline-flex rounded-lg bg-primary px-6 py-3 font-mono text-3xl font-semibold text-primary-foreground sm:text-5xl">
+              <p className="mt-6 inline-flex max-w-full break-all rounded-lg bg-primary px-5 py-3 font-mono text-2xl font-semibold text-primary-foreground sm:text-4xl lg:text-5xl">
                 {announcement.ticket_code}
               </p>
             </motion.div>
@@ -126,7 +126,7 @@ export function PublicDisplayBoard({
 
       <header
         className={cn(
-          "mb-6 flex flex-col gap-4 rounded-lg border p-5 shadow-[var(--shadow-soft)] sm:flex-row sm:items-center sm:justify-between",
+          "mb-5 flex flex-col gap-4 rounded-lg border p-4 shadow-[var(--shadow-soft)] sm:mb-6 lg:flex-row lg:items-center lg:justify-between lg:p-5",
           dark ? "border-white/10 bg-white/5" : "bg-card",
         )}
       >
@@ -142,7 +142,9 @@ export function PublicDisplayBoard({
           <h1
             className={cn(
               "mt-2 truncate font-semibold tracking-normal",
-              tvMode ? "text-5xl sm:text-7xl" : "text-3xl sm:text-5xl",
+              tvMode
+                ? "text-4xl sm:text-6xl lg:text-7xl"
+                : "text-2xl sm:text-4xl lg:text-5xl",
             )}
           >
             {company.trade_name}
@@ -183,7 +185,7 @@ export function PublicDisplayBoard({
         </div>
       </header>
 
-      <main className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
+      <main className="grid gap-5 lg:grid-cols-[0.92fr_1.08fr] lg:gap-6">
         <DisplayColumn
           dark={dark}
           entries={waiting}
@@ -222,7 +224,7 @@ function DisplayColumn({
   return (
     <section
       className={cn(
-        "min-h-[520px] rounded-lg border p-4 shadow-[var(--shadow-soft)]",
+        "min-h-[320px] rounded-lg border p-4 shadow-[var(--shadow-soft)] sm:min-h-[420px] lg:min-h-[520px]",
         dark ? "border-white/10 bg-white/5" : "bg-card",
         tvMode && "min-h-[70vh]",
       )}
@@ -231,7 +233,7 @@ function DisplayColumn({
         <h2
           className={cn(
             "font-semibold tracking-normal",
-            tvMode ? "text-4xl" : "text-2xl",
+            tvMode ? "text-3xl sm:text-4xl" : "text-xl sm:text-2xl",
           )}
         >
           {title}
@@ -264,17 +266,17 @@ function DisplayColumn({
               key={entry.id}
               layout
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <p
                     className={cn(
                       "truncate font-semibold tracking-normal",
                       prominent
                         ? tvMode
-                          ? "text-5xl"
+                          ? "text-4xl sm:text-5xl"
                           : "text-3xl sm:text-4xl"
                         : tvMode
-                          ? "text-4xl"
+                          ? "text-3xl sm:text-4xl"
                           : "text-xl sm:text-2xl",
                     )}
                   >
@@ -305,8 +307,8 @@ function DisplayColumn({
                 </div>
                 <p
                   className={cn(
-                    "shrink-0 rounded-lg bg-primary px-4 py-3 font-mono font-semibold text-primary-foreground",
-                    prominent || tvMode ? "text-3xl" : "text-xl",
+                    "w-full max-w-full shrink-0 break-all rounded-lg bg-primary px-4 py-3 text-center font-mono font-semibold text-primary-foreground sm:w-auto",
+                    prominent || tvMode ? "text-2xl sm:text-3xl" : "text-lg sm:text-xl",
                   )}
                 >
                   {entry.ticket_code}
@@ -318,7 +320,7 @@ function DisplayColumn({
         {entries.length === 0 ? (
           <div
             className={cn(
-              "flex min-h-48 items-center justify-center rounded-lg border border-dashed text-lg font-medium",
+              "flex min-h-36 items-center justify-center rounded-lg border border-dashed text-base font-medium sm:min-h-48 sm:text-lg",
               dark ? "border-white/10 text-white/45" : "text-muted-foreground",
             )}
           >
