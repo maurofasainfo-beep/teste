@@ -117,8 +117,9 @@ export function OperationalBoard({
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
         <MetricCard
+          compact
           detail="Aguardando chamada"
           icon={Clock3}
           label="Na fila"
@@ -126,6 +127,7 @@ export function OperationalBoard({
           value={waiting.length}
         />
         <MetricCard
+          compact
           detail="Chamados em andamento"
           icon={BellRing}
           label="Liberados"
@@ -133,6 +135,7 @@ export function OperationalBoard({
           value={released.length}
         />
         <MetricCard
+          compact
           detail="Cards sincronizados por Realtime"
           icon={ListChecks}
           label="Operacao ativa"
