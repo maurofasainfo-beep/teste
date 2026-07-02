@@ -47,10 +47,10 @@ async function hydrate() {
 
   pollingInterval.value = String(rawConfig?.pollingIntervalSeconds ?? 30);
   sendDelay.value = String(rawConfig?.sendDelayMs ?? 3000);
-  authStatus.textContent = state.authStatus ?? "-";
-  companyName.textContent = state.companyName || "-";
-  deviceStatus.textContent = state.deviceStatus || "-";
-  whatsappStatus.textContent = state.whatsappStatus || "-";
+  authStatus.textContent = labelAuthStatus(state.authStatus);
+  companyName.textContent = formatDisplayValue(state.companyName, "Nao conectada");
+  deviceStatus.textContent = labelDeviceStatus(state.deviceStatus);
+  whatsappStatus.textContent = labelWhatsAppStatus(state.whatsappStatus);
   renderLogs(logs);
 }
 
@@ -148,8 +148,59 @@ function renderLogs(logs) {
           minute: "2-digit",
           second: "2-digit",
         }).format(new Date(log.at))
-      : "-";
+      : "Aguardando";
     item.textContent = `${date} - ${log.event}: ${log.message}`;
     localLogs.appendChild(item);
   }
+}
+
+function labelAuthStatus(value) {
+  const labels = {
+    authenticated: "Autenticado",
+    authenticating: "Autenticando",
+    error: "Erro",
+    not_configured: "Nao configurado",
+    revoked: "Revogado",
+  };
+
+  return labels[value] ?? "Aguardando conexao";
+}
+
+function labelDeviceStatus(value) {
+  const labels = {
+    active: "Ativo",
+    created: "Criado",
+    disconnected: "Desconectado",
+    error: "Erro",
+    expired: "Expirado",
+    not_configured: "Nao configurado",
+    pending_activation: "Aguardando ativacao",
+    revoked: "Revogado",
+  };
+
+  return labels[value] ?? "Aguardando conexao";
+}
+
+function labelWhatsAppStatus(value) {
+  const labels = {
+    connected: "Conectado",
+    disconnected: "Desconectado",
+    error: "Erro",
+    loading: "Carregando",
+    qr_required: "Aguardando QR Code",
+    sending: "Enviando",
+    syncing: "Sincronizando",
+  };
+
+  return labels[value] ?? "Aguardando conexao";
+}
+
+function formatDisplayValue(value, fallback) {
+  const text = String(value ?? "").trim();
+
+  if (!text || ["unknown", "undefined", "null", "-"].includes(text.toLowerCase())) {
+    return fallback;
+  }
+
+  return text;
 }

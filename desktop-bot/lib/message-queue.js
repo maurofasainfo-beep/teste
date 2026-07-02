@@ -1,4 +1,5 @@
 const {
+  fetchMessageStats,
   fetchPendingMessages,
   markMessageProcessing,
   sendAck,
@@ -14,6 +15,8 @@ const {
 const { getWhatsAppStatus, sendWhatsAppMessage } = require("./whatsapp-bridge");
 
 const PROCESSING_TIMEOUT_MS = 60_000;
+const WHATSAPP_PAUSED_MESSAGE =
+  "WhatsApp desconectado. As mensagens ficarao pendentes e serao enviadas quando reconectar.";
 
 let processing = false;
 let heartbeatRunning = false;
@@ -94,10 +97,17 @@ async function runHeartbeat() {
       local_queue_size: state.localQueueSize,
       last_error: state.lastError,
     });
+    await patchRuntimeState({ heartbeatFailureCount: 0 });
+    await refreshMessageStats();
 
     return { ok: true };
   } catch (error) {
-    await logWarn("heartbeat_failed", toSafeError(error));
+    const safeError = toSafeError(error);
+    await incrementFailureCount("heartbeatFailureCount", {
+      lastError:
+        "Nao foi possivel sincronizar com o FasaWait. Verifique a internet e a URL configurada.",
+    });
+    await logWarn("heartbeat_failed", safeError);
     return { ok: false, error: toSafeError(error) };
   } finally {
     heartbeatRunning = false;
@@ -111,6 +121,8 @@ async function runAutomaticPollingCycle() {
     return { skipped: true, reason: "bot_stopped" };
   }
 
+  await patchRuntimeState({ lastPollingAttemptAt: new Date().toISOString() });
+
   if (Date.now() < Number(state.backoffUntil || 0)) {
     return { skipped: true, reason: "backoff" };
   }
@@ -118,11 +130,23 @@ async function runAutomaticPollingCycle() {
   const result = await runNextMessage("automatic");
 
   if (result?.ok === false) {
+    await incrementFailureCount("pollingFailureCount", {
+      lastError:
+        "Nao foi possivel consultar mensagens. Verifique a internet ou reinicie a conexao.",
+    });
     await patchRuntimeState({ backoffUntil: Date.now() + 60_000 });
+  }
+
+  if (result?.ok || result?.reason === "no_messages") {
+    await patchRuntimeState({
+      lastPollingOkAt: new Date().toISOString(),
+      pollingFailureCount: 0,
+    });
   }
 
   if (
     result?.skipped &&
+    !String(result.reason ?? "").startsWith("whatsapp_") &&
     ![
       "not_configured",
       "not_authenticated",
@@ -131,6 +155,7 @@ async function runAutomaticPollingCycle() {
       "no_messages",
     ].includes(result.reason)
   ) {
+    await incrementFailureCount("pollingFailureCount");
     await patchRuntimeState({ backoffUntil: Date.now() + 30_000 });
   }
 
@@ -184,7 +209,16 @@ async function runNextMessage(reason) {
       await patchRuntimeState({
         whatsappStatus: whatsappStatus.whatsapp_status,
         lastPollingAt: new Date().toISOString(),
+        lastError: getWhatsAppPausedMessage(whatsappStatus.whatsapp_status),
       });
+      await refreshMessageStats();
+      if (state.whatsappStatus !== whatsappStatus.whatsapp_status) {
+        await logWarn(
+          "whatsapp_disconnected",
+          getWhatsAppPausedMessage(whatsappStatus.whatsapp_status),
+          { status: whatsappStatus.whatsapp_status },
+        );
+      }
       return {
         skipped: true,
         reason: `whatsapp_${whatsappStatus.whatsapp_status}`,
@@ -193,7 +227,12 @@ async function runNextMessage(reason) {
 
     const batch = await fetchPendingMessages(1);
     const messages = Array.isArray(batch.messages) ? batch.messages : [];
-    await patchRuntimeState({ localQueueSize: messages.length });
+    await patchRuntimeState({
+      localQueueSize: messages.length,
+      whatsappStatus: "connected",
+      lastError: "",
+    });
+    await refreshMessageStats();
 
     if (messages.length === 0) {
       return { skipped: true, reason: "no_messages" };
@@ -302,6 +341,7 @@ async function processMessage(message) {
     await patchRuntimeState({
       processedCount: Number(nextState.processedCount || 0) + 1,
     });
+    await refreshMessageStats();
     await logInfo("message_sent", "Mensagem confirmada no backend.", {
       message_id: message.id,
       to: maskPhone(message.to),
@@ -309,8 +349,44 @@ async function processMessage(message) {
     await releaseMessageLock({ lastProcessedMessageId: message.id });
   } catch (error) {
     await acknowledgeFailure(message, toSafeError(error), true);
+    await refreshMessageStats();
     await releaseMessageLock();
   }
+}
+
+async function refreshMessageStats() {
+  try {
+    return await fetchMessageStats();
+  } catch (error) {
+    await logWarn("message_stats_failed", toSafeError(error));
+    return null;
+  }
+}
+
+async function incrementFailureCount(field, patch = {}) {
+  const state = await getRuntimeState();
+  const current = Number(state[field] || 0);
+
+  await patchRuntimeState({
+    [field]: current + 1,
+    ...patch,
+  });
+}
+
+function getWhatsAppPausedMessage(status) {
+  if (status === "qr_required") {
+    return "Escaneie o QR Code para continuar os envios. As mensagens ficarao pendentes.";
+  }
+
+  if (status === "loading") {
+    return "WhatsApp carregando. O envio esta pausado ate a conexao ficar pronta.";
+  }
+
+  if (status === "error") {
+    return "Erro no WhatsApp Web. As mensagens ficarao pendentes e serao reenviadas depois.";
+  }
+
+  return WHATSAPP_PAUSED_MESSAGE;
 }
 
 function randomSendDelayMs() {

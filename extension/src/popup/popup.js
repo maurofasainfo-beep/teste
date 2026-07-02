@@ -46,10 +46,10 @@ async function refresh() {
   }
 
   const state = response.state ?? {};
-  setText(elements.companyName, state.companyName || "-");
-  setText(elements.deviceStatus, state.deviceStatus || "-");
-  setText(elements.whatsappStatus, state.whatsappStatus || "-");
-  setText(elements.connectedPhone, state.connectedPhone || "-");
+  setText(elements.companyName, formatDisplayValue(state.companyName, "Nao conectada"));
+  setText(elements.deviceStatus, labelDeviceStatus(state.deviceStatus));
+  setText(elements.whatsappStatus, labelWhatsAppStatus(state.whatsappStatus));
+  setText(elements.connectedPhone, formatDisplayValue(state.connectedPhone, "Nao identificado"));
   setText(elements.localQueueSize, String(state.localQueueSize ?? 0));
   setText(elements.lastHeartbeat, formatDate(state.lastHeartbeatAt));
   setText(elements.lastPolling, formatDate(state.lastPollingAt));
@@ -65,7 +65,7 @@ async function refresh() {
 
   if (state.lastError) {
     elements.lastErrorPanel.hidden = false;
-    setText(elements.lastError, state.lastError);
+    setText(elements.lastError, formatFriendlyError(state.lastError));
   } else {
     elements.lastErrorPanel.hidden = true;
     setText(elements.lastError, "");
@@ -93,7 +93,7 @@ function setText(element, value) {
 
 function formatDate(value) {
   if (!value) {
-    return "-";
+    return "Aguardando";
   }
 
   return new Intl.DateTimeFormat("pt-BR", {
@@ -112,7 +112,53 @@ function labelAuthStatus(value) {
     revoked: "Revogado",
   };
 
-  return labels[value] ?? value ?? "-";
+  return labels[value] ?? "Aguardando conexao";
+}
+
+function labelDeviceStatus(value) {
+  const labels = {
+    active: "Ativo",
+    created: "Criado",
+    disconnected: "Desconectado",
+    error: "Erro",
+    expired: "Expirado",
+    not_configured: "Nao configurado",
+    pending_activation: "Aguardando ativacao",
+    revoked: "Revogado",
+  };
+
+  return labels[value] ?? "Aguardando conexao";
+}
+
+function labelWhatsAppStatus(value) {
+  const labels = {
+    connected: "Conectado",
+    disconnected: "Desconectado",
+    error: "Erro",
+    loading: "Carregando",
+    qr_required: "Aguardando QR Code",
+    sending: "Enviando",
+    syncing: "Sincronizando",
+  };
+
+  return labels[value] ?? "Aguardando conexao";
+}
+
+function formatDisplayValue(value, fallback) {
+  const text = String(value ?? "").trim();
+
+  if (!text || ["unknown", "undefined", "null", "-"].includes(text.toLowerCase())) {
+    return fallback;
+  }
+
+  return text;
+}
+
+function formatFriendlyError(value) {
+  return formatDisplayValue(value, "Nao foi possivel concluir a operacao.").replace(
+    /\bunknown\b/gi,
+    "informacao indisponivel",
+  );
 }
 
 function badgeClass(value) {

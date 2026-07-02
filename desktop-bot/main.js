@@ -3,6 +3,7 @@ const {
   app,
   BrowserWindow,
   Menu,
+  Notification,
   Tray,
   ipcMain,
   nativeImage,
@@ -11,7 +12,7 @@ const {
 } = require("electron");
 
 const { validateAuthentication } = require("./lib/qwep-client");
-const { logError, logInfo, toSafeError } = require("./lib/logger");
+const { logError, logInfo, logWarn, toSafeError } = require("./lib/logger");
 const {
   clearConfig,
   configureStorage,
@@ -46,7 +47,11 @@ let whatsappWindow = null;
 let tray = null;
 let heartbeatTimer = null;
 let pollingTimer = null;
+let watchdogTimer = null;
 let isQuitting = false;
+let lastNotifiedWhatsAppStatus = "";
+
+const WATCHDOG_STALE_MS = 2 * 60 * 1000;
 
 const gotLock = app.requestSingleInstanceLock();
 
@@ -80,7 +85,7 @@ app.whenReady().then(async () => {
 
   if (state.botRunning) {
     try {
-      await startBot();
+      await startBot({ resumed: true });
     } catch (error) {
       await patchRuntimeState({
         botRunning: false,
@@ -208,6 +213,7 @@ async function updateTrayMenu() {
   }
 
   const state = await getRuntimeState();
+  tray.setToolTip(getTrayTooltip(state));
   const menu = Menu.buildFromTemplate([
     {
       label: "Abrir painel",
@@ -216,6 +222,15 @@ async function updateTrayMenu() {
     {
       label: "Abrir WhatsApp Web",
       click: () => openWhatsAppWeb().catch(reportBackgroundError),
+    },
+    { type: "separator" },
+    {
+      label: "Reiniciar conexao",
+      click: () => restartBot().catch(reportBackgroundError),
+    },
+    {
+      label: "Atualizar status",
+      click: () => getWhatsAppStatus().then(broadcastState).catch(reportBackgroundError),
     },
     { type: "separator" },
     {
@@ -245,6 +260,11 @@ function clearTimers() {
     clearInterval(pollingTimer);
     pollingTimer = null;
   }
+
+  if (watchdogTimer) {
+    clearInterval(watchdogTimer);
+    watchdogTimer = null;
+  }
 }
 
 async function scheduleTimers() {
@@ -264,10 +284,16 @@ async function scheduleTimers() {
     runAutomaticPollingCycle().then(broadcastState).catch(reportBackgroundError);
   }, pollingSeconds * 1000);
 
+  watchdogTimer = setInterval(() => {
+    runWatchdog().then(broadcastState).catch(reportBackgroundError);
+  }, 30_000);
+
   await runHeartbeat().catch(reportBackgroundError);
+  await runAutomaticPollingCycle().catch(reportBackgroundError);
+  await runWatchdog().catch(reportBackgroundError);
 }
 
-async function startBot() {
+async function startBot(options = {}) {
   const config = await getConfig();
 
   if (!config?.baseUrl || !config?.token || !config?.signingSecret) {
@@ -294,9 +320,30 @@ async function startBot() {
     throw new Error(message);
   }
 
-  await patchRuntimeState({ botRunning: true, lastError: "" });
+  await ensureAutoStartEnabled();
+  const startupNotice = options.resumed
+    ? "Bot reiniciado e pronto para continuar."
+    : "";
+  await patchRuntimeState({
+    botRunning: true,
+    lastError: "",
+    startupNotice,
+    lastStartupAt: new Date().toISOString(),
+    watchdogStatus: "",
+    pollingFailureCount: 0,
+    heartbeatFailureCount: 0,
+  });
   await scheduleTimers();
-  await logInfo("bot_started", "Bot iniciado.");
+  await logInfo(
+    options.resumed ? "bot_restarted" : "bot_started",
+    options.resumed ? "Bot reiniciado e pronto para continuar." : "Bot iniciado.",
+  );
+  if (options.resumed) {
+    showNativeNotification(
+      "FasaWait Bot reiniciado",
+      "Bot reiniciado e pronto para continuar.",
+    );
+  }
   await updateTrayMenu();
   await broadcastState();
   return { ok: true };
@@ -310,6 +357,18 @@ async function stopBot() {
   await updateTrayMenu();
   await broadcastState();
   return { ok: true };
+}
+
+async function restartBot() {
+  clearTimers();
+  resetQueueRuntime();
+  await patchRuntimeState({
+    botRunning: true,
+    lastError: "Reiniciando conexao com o FasaWait e WhatsApp.",
+    watchdogStatus: "",
+  });
+  await logInfo("bot_restart_requested", "Reinicio de conexao solicitado.");
+  return startBot();
 }
 
 async function testConnection() {
@@ -354,6 +413,7 @@ async function getSnapshot() {
 
 async function broadcastState() {
   const snapshot = await getSnapshot();
+  maybeNotifyOperationalStatus(snapshot.state ?? {});
 
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send("bot:state-updated", snapshot);
@@ -368,6 +428,135 @@ async function applyStoredAutoStart() {
     openAtLogin: Boolean(config?.autoStart),
     path: process.execPath,
   });
+}
+
+async function ensureAutoStartEnabled() {
+  const config = await getPublicConfig();
+
+  if (config?.autoStart) {
+    await applyStoredAutoStart();
+    return;
+  }
+
+  await setAutoStart(true);
+  app.setLoginItemSettings({
+    openAtLogin: true,
+    path: process.execPath,
+  });
+  await logInfo(
+    "auto_start_enabled",
+    "Inicializacao com Windows ativada para retomar o bot apos reiniciar o computador.",
+  );
+}
+
+async function runWatchdog() {
+  const state = await getRuntimeState();
+
+  if (!state.botRunning) {
+    if (state.watchdogStatus) {
+      await patchRuntimeState({ watchdogStatus: "" });
+    }
+    return;
+  }
+
+  const whatsappStatus = String(state.whatsappStatus ?? "").toLowerCase();
+  const staleHeartbeat = isStale(state.lastHeartbeatAt);
+  const stalePolling =
+    whatsappStatus === "connected" &&
+    isStale(state.lastPollingAttemptAt || state.lastPollingAt);
+  const repeatedPollingFailure = Number(state.pollingFailureCount || 0) >= 3;
+  const repeatedHeartbeatFailure = Number(state.heartbeatFailureCount || 0) >= 3;
+  let alert = "";
+
+  if (staleHeartbeat || repeatedHeartbeatFailure) {
+    alert =
+      "Atencao: o bot nao sincroniza ha 2 minutos. Verifique a internet ou reinicie a conexao.";
+  } else if (stalePolling || repeatedPollingFailure) {
+    alert =
+      "Atencao: o bot nao consulta mensagens ha 2 minutos. Verifique a internet ou reinicie a conexao.";
+  }
+
+  if (alert) {
+    if (state.watchdogStatus !== alert) {
+      await patchRuntimeState({ watchdogStatus: alert, lastError: alert });
+      await logWarn("watchdog_alert", alert);
+    }
+    return;
+  }
+
+  if (state.watchdogStatus) {
+    await patchRuntimeState({
+      watchdogStatus: "",
+      lastError: state.lastError === state.watchdogStatus ? "" : state.lastError,
+    });
+    await logInfo("watchdog_recovered", "Sincronizacao recuperada.");
+  }
+}
+
+function isStale(value) {
+  if (!value) {
+    return false;
+  }
+
+  const timestamp = new Date(value).getTime();
+
+  return Number.isFinite(timestamp) && Date.now() - timestamp > WATCHDOG_STALE_MS;
+}
+
+function getTrayTooltip(state) {
+  if (!state.botRunning) {
+    return "FasaWait Bot - pausado";
+  }
+
+  if (state.watchdogStatus) {
+    return "FasaWait Bot - atencao na sincronizacao";
+  }
+
+  if (state.whatsappStatus === "connected") {
+    return "FasaWait Bot - WhatsApp conectado";
+  }
+
+  return "FasaWait Bot - WhatsApp desconectado";
+}
+
+function maybeNotifyOperationalStatus(state) {
+  if (!state.botRunning) {
+    lastNotifiedWhatsAppStatus = "";
+    return;
+  }
+
+  const status = String(state.whatsappStatus ?? "").toLowerCase();
+
+  if (["disconnected", "qr_required", "error"].includes(status)) {
+    if (lastNotifiedWhatsAppStatus !== status) {
+      showNativeNotification(
+        status === "qr_required"
+          ? "WhatsApp aguardando QR Code"
+          : "WhatsApp desconectado",
+        status === "qr_required"
+          ? "Escaneie o QR Code para continuar os envios."
+          : "As mensagens ficarao pendentes e serao enviadas quando reconectar.",
+      );
+    }
+    lastNotifiedWhatsAppStatus = status;
+    return;
+  }
+
+  if (status === "connected" && lastNotifiedWhatsAppStatus) {
+    showNativeNotification("WhatsApp conectado", "Envio automatico retomado.");
+  }
+
+  if (status) {
+    lastNotifiedWhatsAppStatus = status;
+  }
+}
+
+function showNativeNotification(title, body) {
+  if (!Notification.isSupported()) {
+    return;
+  }
+
+  new Notification({ title, body }).show();
 }
 
 async function reportBackgroundError(error) {
@@ -403,6 +592,8 @@ ipcMain.handle("bot:start", async () => startBot());
 
 ipcMain.handle("bot:stop", async () => stopBot());
 
+ipcMain.handle("bot:restart", async () => restartBot());
+
 ipcMain.handle("bot:reset-state", async () => {
   clearTimers();
   resetQueueRuntime();
@@ -426,9 +617,19 @@ ipcMain.handle("bot:refresh-whatsapp-status", async () => {
 });
 
 ipcMain.handle("bot:set-auto-start", async (_event, autoStart) => {
-  const config = await setAutoStart(Boolean(autoStart));
+  const state = await getRuntimeState();
+  const nextAutoStart = state.botRunning ? true : Boolean(autoStart);
+
+  if (state.botRunning && !autoStart) {
+    await logWarn(
+      "auto_start_required",
+      "Auto-start mantido ativo porque o bot esta rodando.",
+    );
+  }
+
+  const config = await setAutoStart(nextAutoStart);
   app.setLoginItemSettings({
-    openAtLogin: Boolean(autoStart),
+    openAtLogin: nextAutoStart,
     path: process.execPath,
   });
   await broadcastState();

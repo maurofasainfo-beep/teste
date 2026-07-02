@@ -22,11 +22,14 @@ const elements = {
   localQueue: document.getElementById("local-queue"),
   logs: document.getElementById("logs"),
   openWhatsApp: document.getElementById("open-whatsapp"),
+  pendingMessages: document.getElementById("pending-messages"),
   pollingInterval: document.getElementById("polling-interval"),
   primaryDot: document.getElementById("primary-dot"),
   primaryStatus: document.getElementById("primary-status"),
   processedCount: document.getElementById("processed-count"),
   refreshStatus: document.getElementById("refresh-status"),
+  failedMessages: document.getElementById("failed-messages"),
+  restartBot: document.getElementById("restart-bot"),
   resetState: document.getElementById("reset-state"),
   sendDelay: document.getElementById("send-delay"),
   signingSecret: document.getElementById("signing-secret"),
@@ -37,6 +40,9 @@ const elements = {
   toggleSigningSecret: document.getElementById("toggle-signing-secret"),
   toggleToken: document.getElementById("toggle-token"),
   whatsappDot: document.getElementById("whatsapp-dot"),
+  whatsappAlertBox: document.getElementById("whatsapp-alert-box"),
+  whatsappAlertMessage: document.getElementById("whatsapp-alert-message"),
+  whatsappAlertTitle: document.getElementById("whatsapp-alert-title"),
   whatsappStatus: document.getElementById("whatsapp-status"),
 };
 
@@ -76,6 +82,9 @@ elements.startBot.addEventListener("click", () => runAction(window.queueBot.star
 elements.stopBot.addEventListener("click", () => runAction(window.queueBot.stopBot));
 elements.openWhatsApp.addEventListener("click", () =>
   runAction(window.queueBot.openWhatsApp),
+);
+elements.restartBot.addEventListener("click", () =>
+  runAction(window.queueBot.restartBot),
 );
 elements.resetState.addEventListener("click", async () => {
   if (!confirm("Resetar locks, filas locais e erros sem apagar credenciais?")) {
@@ -194,6 +203,8 @@ function render(snapshot) {
   );
   elements.processedCount.textContent = String(state.processedCount ?? 0);
   elements.localQueue.textContent = String(state.localQueueSize ?? 0);
+  elements.pendingMessages.textContent = String(getWaitingMessageCount(state));
+  elements.failedMessages.textContent = String(state.failedMessageCount ?? 0);
   elements.botStatus.textContent = getBotStatusLabel(state, config);
   elements.botStatusDot.classList.remove("on", "bad");
   elements.botStatusDot.classList.toggle("on", Boolean(state.botRunning));
@@ -211,7 +222,10 @@ function render(snapshot) {
   );
   setMetricState(elements.lastHeartbeat.closest(".metric"), getHeartbeatLevel(state.lastHeartbeatAt));
 
-  const hasError = Boolean(state.lastError);
+  const operationalAlert = getOperationalAlert(state);
+  renderOperationalAlert(operationalAlert);
+
+  const hasError = Boolean(state.lastError) && !operationalAlert;
   elements.lastErrorBox.classList.toggle("hidden", !hasError);
   elements.lastError.textContent = formatFriendlyError(state.lastError);
 
@@ -301,6 +315,101 @@ function getBotStatusLabel(state, config) {
   return state.botRunning ? "Bot rodando" : "Bot pausado";
 }
 
+function getWaitingMessageCount(state) {
+  return (
+    Number(state.pendingMessageCount || 0) +
+    Number(state.retryMessageCount || 0) +
+    Number(state.reservedMessageCount || 0) +
+    Number(state.processingMessageCount || 0)
+  );
+}
+
+function getOperationalAlert(state) {
+  if (!state.botRunning) {
+    return null;
+  }
+
+  if (state.watchdogStatus) {
+    return {
+      level: "bad",
+      title: "Bot sem sincronizacao",
+      message: state.watchdogStatus,
+    };
+  }
+
+  const whatsappStatus = String(state.whatsappStatus ?? "").toLowerCase();
+  const waitingCount = getWaitingMessageCount(state);
+
+  if (whatsappStatus === "qr_required") {
+    return {
+      level: "warn",
+      title: "Aguardando QR Code",
+      message:
+        "Escaneie o QR Code para continuar os envios. As mensagens ficarao pendentes.",
+    };
+  }
+
+  if (whatsappStatus === "loading") {
+    return {
+      level: "warn",
+      title: "WhatsApp carregando",
+      message: "Envio pausado ate o WhatsApp Web terminar de carregar.",
+    };
+  }
+
+  if (["disconnected", "error"].includes(whatsappStatus)) {
+    return {
+      level: "bad",
+      title: "WhatsApp desconectado",
+      message:
+        waitingCount > 0
+          ? `${waitingCount} mensagens aguardando envio. Elas serao enviadas quando reconectar.`
+          : "As mensagens ficarao pendentes e serao enviadas quando reconectar.",
+    };
+  }
+
+  if (waitingCount > 0) {
+    return {
+      level: "warn",
+      title: `${waitingCount} mensagens aguardando envio`,
+      message: "O bot esta conectado e vai processar automaticamente.",
+    };
+  }
+
+  if (state.startupNotice && isRecent(state.lastStartupAt, 180_000)) {
+    return {
+      level: "good",
+      title: "Bot reiniciado",
+      message: state.startupNotice,
+    };
+  }
+
+  return null;
+}
+
+function renderOperationalAlert(alert) {
+  elements.whatsappAlertBox.classList.toggle("hidden", !alert);
+
+  if (!alert) {
+    return;
+  }
+
+  elements.whatsappAlertBox.classList.remove("good", "warn", "bad");
+  elements.whatsappAlertBox.classList.add(alert.level);
+  elements.whatsappAlertTitle.textContent = alert.title;
+  elements.whatsappAlertMessage.textContent = alert.message;
+}
+
+function isRecent(value, maxAgeMs) {
+  const date = new Date(value ?? "");
+
+  if (Number.isNaN(date.getTime())) {
+    return false;
+  }
+
+  return Date.now() - date.getTime() <= maxAgeMs;
+}
+
 function formatFriendlyError(value) {
   const message = formatDisplayValue(
     value,
@@ -345,6 +454,14 @@ function formatFriendlyError(value) {
 
 function formatLogMessage(value, eventName) {
   const friendlyMessages = {
+    auto_start_enabled: "Inicializacao com Windows ativada.",
+    auto_start_required:
+      "Auto-start mantido ativo enquanto o bot esta rodando.",
+    bot_restarted: "Bot reiniciado e pronto para continuar.",
+    bot_restart_requested: "Reinicio de conexao solicitado.",
+    watchdog_recovered: "Sincronizacao recuperada.",
+    whatsapp_disconnected:
+      "WhatsApp desconectado. As mensagens ficarao pendentes.",
     auth_ok: "Dispositivo autenticado com sucesso.",
     bot_started: "Processamento automático iniciado.",
     bot_stopped: "Processamento automático pausado.",
@@ -704,6 +821,13 @@ function humanizeEvent(eventName) {
   }
 
   const labels = {
+    auto_start_enabled: "Auto-start ativado",
+    auto_start_required: "Auto-start mantido",
+    bot_restarted: "Bot reiniciado",
+    bot_restart_requested: "Reinicio solicitado",
+    watchdog_alert: "Alerta de sincronizacao",
+    watchdog_recovered: "Sincronizacao recuperada",
+    whatsapp_disconnected: "WhatsApp desconectado",
     ack_failed: "Confirmação não enviada",
     auth_failed: "Conexão recusada",
     auth_ok: "Conexão validada",

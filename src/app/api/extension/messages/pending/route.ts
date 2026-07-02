@@ -4,7 +4,11 @@ import { normalizeBrazilianPhone } from "@/lib/phone";
 import { authenticateQwepRequest } from "@/lib/qwep/auth";
 import { hashReservationToken } from "@/lib/qwep/crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { MessageEvent } from "@/lib/types/database";
+import type { Database, MessageEvent } from "@/lib/types/database";
+
+type ReservedMessageEvent =
+  Database["public"]["Functions"]["reserve_pending_message_events"]["Returns"][number];
+type FallbackReservedMessageEvent = MessageEvent & { reservation_token: string };
 
 function getTextPayload(payload: unknown) {
   if (!payload || typeof payload !== "object") {
@@ -37,12 +41,57 @@ function addSeconds(date: Date, seconds: number) {
   return new Date(date.getTime() + seconds * 1000).toISOString();
 }
 
-async function releaseExpiredReservations(
-  admin: ReturnType<typeof createAdminClient>,
-  companyId: string,
-) {
-  const now = new Date().toISOString();
+function isMissingReserveRpcError(error: { code?: string; message?: string }) {
+  const code = String(error.code ?? "");
+  const message = String(error.message ?? "").toLowerCase();
 
+  return (
+    code === "PGRST202" ||
+    message.includes("reserve_pending_message_events") ||
+    message.includes("schema cache")
+  );
+}
+
+async function reservePendingMessageEvents({
+  admin,
+  companyId,
+  deviceId,
+  batchLimit,
+}: {
+  admin: ReturnType<typeof createAdminClient>;
+  companyId: string;
+  deviceId: string;
+  batchLimit: number;
+}) {
+  const { data, error } = await admin.rpc("reserve_pending_message_events", {
+    target_device_id: deviceId,
+    batch_limit: batchLimit,
+  });
+
+  if (error) {
+    if (isMissingReserveRpcError(error)) {
+      return reservePendingMessageEventsFallback({
+        admin,
+        companyId,
+        deviceId,
+        batchLimit,
+      });
+    }
+
+    throw new Error(error.message);
+  }
+
+  return (data ?? []) as ReservedMessageEvent[];
+}
+
+async function releaseExpiredReservationsFallback({
+  admin,
+  companyId,
+}: {
+  admin: ReturnType<typeof createAdminClient>;
+  companyId: string;
+}) {
+  const now = new Date().toISOString();
   const { data: expired, error } = await admin
     .from("message_events")
     .select("id, attempt_count, max_attempts")
@@ -112,7 +161,7 @@ async function releaseExpiredReservations(
   }
 }
 
-async function reservePendingMessageEvents({
+async function reservePendingMessageEventsFallback({
   admin,
   companyId,
   deviceId,
@@ -123,7 +172,7 @@ async function reservePendingMessageEvents({
   deviceId: string;
   batchLimit: number;
 }) {
-  await releaseExpiredReservations(admin, companyId);
+  await releaseExpiredReservationsFallback({ admin, companyId });
 
   const now = new Date();
   const { data, error } = await admin
@@ -132,7 +181,6 @@ async function reservePendingMessageEvents({
     .eq("company_id", companyId)
     .eq("provider", "whatsapp_extension")
     .in("status", ["pending", "retry"])
-    .lt("attempt_count", 10)
     .order("created_at", { ascending: true })
     .limit(Math.max(batchLimit * 5, 5));
 
@@ -157,7 +205,7 @@ async function reservePendingMessageEvents({
     })
     .slice(0, batchLimit);
 
-  const reserved = [];
+  const reserved: FallbackReservedMessageEvent[] = [];
 
   for (const event of candidates) {
     const reservationId = randomUUID();

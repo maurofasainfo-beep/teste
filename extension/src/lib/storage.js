@@ -6,8 +6,8 @@ const STORAGE_KEYS = {
 
 const DEFAULT_STATE = {
   authStatus: "not_configured",
-  deviceStatus: "unknown",
-  whatsappStatus: "unknown",
+  deviceStatus: "not_configured",
+  whatsappStatus: "disconnected",
   companyName: "",
   deviceId: "",
   isPrimarySender: false,
@@ -91,6 +91,13 @@ export async function getLocalLogs() {
 
 export function normalizeBaseUrl(value) {
   const url = new URL(String(value ?? "").trim());
+  const host = url.hostname.toLowerCase();
+  const isLocalHost = host === "localhost" || host === "127.0.0.1" || host === "::1";
+
+  if (url.protocol === "http:" && !isLocalHost) {
+    url.protocol = "https:";
+  }
+
   url.pathname = "";
   url.search = "";
   url.hash = "";

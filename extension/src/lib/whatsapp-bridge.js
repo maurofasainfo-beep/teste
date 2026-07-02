@@ -40,9 +40,10 @@ export async function getWhatsAppStatus() {
       func: detectWhatsAppStatus,
     });
     const response = injection?.result ?? {};
+    const whatsappStatus = normalizeWhatsAppStatus(response?.whatsapp_status);
 
     const status = {
-      whatsapp_status: response?.whatsapp_status ?? "unknown",
+      whatsapp_status: whatsappStatus,
       connected_phone: response?.connected_phone ?? "",
       reason: response?.reason ?? "",
     };
@@ -91,12 +92,16 @@ export async function sendWhatsAppMessage({ messageId, to, text, timeoutMs = 450
   const response = injection?.result;
 
   if (!response?.ok) {
+    await patchRuntimeState({
+      whatsappStatus: normalizeWhatsAppStatus(response?.whatsapp_status),
+      lastError: response?.error ?? "Falha ao enviar pelo WhatsApp Web.",
+    });
     throw new Error(response?.error ?? "Falha ao enviar pelo WhatsApp Web.");
   }
 
   await patchRuntimeState({
     lastSendAt: new Date().toISOString(),
-    whatsappStatus: response.whatsapp_status ?? "connected",
+    whatsappStatus: normalizeWhatsAppStatus(response.whatsapp_status ?? "connected"),
     lastProcessedMessageId: messageId ?? "",
   });
 
@@ -124,6 +129,26 @@ function normalizePhoneForWhatsApp(value) {
   }
 
   return digits;
+}
+
+function normalizeWhatsAppStatus(value) {
+  const status = String(value ?? "").toLowerCase();
+
+  if (
+    [
+      "connected",
+      "disconnected",
+      "loading",
+      "qr_required",
+      "error",
+      "sending",
+      "syncing",
+    ].includes(status)
+  ) {
+    return status;
+  }
+
+  return "disconnected";
 }
 
 function detectWhatsAppStatus() {
@@ -171,7 +196,7 @@ function detectWhatsAppStatus() {
   }
 
   return {
-    whatsapp_status: "unknown",
+    whatsapp_status: "disconnected",
     connected_phone: "",
     reason: "status_not_detected",
   };

@@ -68,6 +68,23 @@ export default async function SettingsPage() {
     .eq("company_id", company.id)
     .order("created_at", { ascending: false })
     .limit(8);
+  const messageStatusSummary = { pending: 0, retry: 0, failed: 0 };
+  const messageStatusResults = await Promise.all(
+    (["pending", "retry", "failed"] as const).map(async (status) => {
+      const { count } = await supabase
+        .from("message_events")
+        .select("id", { count: "exact", head: true })
+        .eq("company_id", company.id)
+        .eq("provider", "whatsapp_extension")
+        .eq("status", status);
+
+      return [status, count ?? 0] as const;
+    }),
+  );
+
+  for (const [status, count] of messageStatusResults) {
+    messageStatusSummary[status] = count;
+  }
 
   const releasedExpirationMinutes =
     settings?.released_link_expiration_minutes ?? 5;
@@ -144,6 +161,7 @@ export default async function SettingsPage() {
           <WhatsAppDevicesPanel
             devices={whatsappDevices ?? []}
             logs={whatsappLogs ?? []}
+            messageStatusSummary={messageStatusSummary}
             notificationChannel={notificationChannel}
           />
 

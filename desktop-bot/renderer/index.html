@@ -30,6 +30,9 @@
           <button id="open-whatsapp" type="button" class="button secondary">
             Abrir WhatsApp
           </button>
+          <button id="restart-bot" type="button" class="button secondary">
+            Reiniciar conexao
+          </button>
           <button id="stop-bot" type="button" class="button danger-soft">
             Pausar
           </button>
@@ -192,6 +195,13 @@
             </button>
           </div>
 
+          <div id="whatsapp-alert-box" class="attention-box hidden" role="status">
+            <span id="whatsapp-alert-title">WhatsApp desconectado</span>
+            <strong id="whatsapp-alert-message">
+              As mensagens ficarao pendentes e serao enviadas quando reconectar.
+            </strong>
+          </div>
+
           <div class="metrics">
             <div class="metric">
               <span>Último heartbeat</span>
@@ -215,6 +225,14 @@
             <div class="metric">
               <span>Fila local</span>
               <strong id="local-queue">0</strong>
+            </div>
+            <div class="metric">
+              <span>Aguardando envio</span>
+              <strong id="pending-messages">0</strong>
+            </div>
+            <div class="metric">
+              <span>Falhas</span>
+              <strong id="failed-messages">0</strong>
             </div>
             <div class="metric">
               <span>WhatsApp</span>

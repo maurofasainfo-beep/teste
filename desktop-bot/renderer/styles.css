@@ -216,6 +216,7 @@ h2 {
 
 .header-actions {
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .button {
@@ -528,6 +529,49 @@ input::placeholder {
   font-size: 11px;
   font-weight: 680;
   line-height: 1.35;
+}
+
+.attention-box {
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  padding: 10px;
+}
+
+.attention-box span {
+  color: #991b1b;
+  font-size: 10px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.attention-box strong {
+  color: #7f1d1d;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.attention-box.warn {
+  border-color: #fde68a;
+  background: var(--warning-soft);
+}
+
+.attention-box.warn span,
+.attention-box.warn strong {
+  color: #92400e;
+}
+
+.attention-box.good {
+  border-color: #bbf7d0;
+  background: var(--success-soft);
+}
+
+.attention-box.good span,
+.attention-box.good strong {
+  color: #166534;
 }
 
 .hidden {

@@ -138,7 +138,7 @@ async function resetExtensionState() {
     processingStartedAt: "",
     navigationInProgress: false,
     lastPollingAt: "",
-    whatsappStatus: "unknown",
+    whatsappStatus: "disconnected",
   });
   await scheduleOperationalAlarms();
 }

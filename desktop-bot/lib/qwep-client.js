@@ -73,6 +73,34 @@ async function fetchPendingMessages(limit = 1) {
   return response;
 }
 
+async function fetchMessageStats() {
+  let response;
+
+  try {
+    response = await qwepRequest("/api/extension/messages/stats", {
+      method: "GET",
+    });
+  } catch (error) {
+    if (String(error?.message ?? error).includes("Falha HTTP 404")) {
+      return { stats_unavailable: true };
+    }
+
+    throw error;
+  }
+
+  const stats = response?.stats ?? {};
+
+  await patchRuntimeState({
+    pendingMessageCount: Number(stats.pending || 0),
+    retryMessageCount: Number(stats.retry || 0),
+    reservedMessageCount: Number(stats.reserved || 0),
+    processingMessageCount: Number(stats.processing || 0),
+    failedMessageCount: Number(stats.failed || 0),
+  });
+
+  return response;
+}
+
 async function sendAck(messageId, payload) {
   return qwepRequest(`/api/extension/messages/${messageId}/ack`, {
     method: "POST",
@@ -103,7 +131,7 @@ async function sendHeartbeat(payload) {
 
   await patchRuntimeState({
     lastHeartbeatAt: new Date().toISOString(),
-    deviceStatus: response.device_status ?? "unknown",
+    deviceStatus: response.device_status ?? "not_configured",
     isPrimarySender:
       typeof response.is_primary_sender === "boolean"
         ? Boolean(response.is_primary_sender)
@@ -157,12 +185,24 @@ async function qwepRequest(path, options) {
   const body = await parseJson(response);
 
   if (!response.ok) {
-    throw new Error(body?.error ?? `Falha HTTP ${response.status}.`);
+    throw new Error(getResponseErrorMessage(body, response.status));
   }
 
   ensureQwepJsonResponse(response, body);
 
   return body;
+}
+
+function getResponseErrorMessage(body, status) {
+  if (body?.error && body?.detail) {
+    return `${body.error}: ${body.detail}`;
+  }
+
+  if (body?.error) {
+    return body.error;
+  }
+
+  return `Falha HTTP ${status}.`;
 }
 
 function ensureQwepJsonResponse(response, body) {
@@ -212,6 +252,7 @@ async function parseJson(response) {
 }
 
 module.exports = {
+  fetchMessageStats,
   fetchPendingMessages,
   markMessageProcessing,
   sendAck,

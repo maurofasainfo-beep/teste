@@ -2,12 +2,14 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const STORE_FILE = "fasawait-bot-state.json";
+const STORE_BACKUP_FILE = "fasawait-bot-state.backup.json";
+const STORE_TEMP_FILE = "fasawait-bot-state.tmp.json";
 const LEGACY_STORE_FILES = ["queue-saas-bot-state.json"];
 
 const DEFAULT_STATE = {
   authStatus: "not_configured",
-  deviceStatus: "unknown",
-  whatsappStatus: "unknown",
+  deviceStatus: "not_configured",
+  whatsappStatus: "disconnected",
   botRunning: false,
   companyName: "",
   deviceId: "",
@@ -16,13 +18,25 @@ const DEFAULT_STATE = {
   connectedPhone: "",
   lastHeartbeatAt: "",
   lastPollingAt: "",
+  lastPollingAttemptAt: "",
+  lastPollingOkAt: "",
   lastSendAt: "",
   lastError: "",
   processedCount: 0,
   localQueueSize: 0,
+  pendingMessageCount: 0,
+  retryMessageCount: 0,
+  reservedMessageCount: 0,
+  processingMessageCount: 0,
+  failedMessageCount: 0,
   currentMessageId: "",
   processingStartedAt: "",
   lastProcessedMessageId: "",
+  pollingFailureCount: 0,
+  heartbeatFailureCount: 0,
+  watchdogStatus: "",
+  startupNotice: "",
+  lastStartupAt: "",
   pollingIntervalSeconds: 30,
   heartbeatIntervalSeconds: 30,
   maxBatchSize: 5,
@@ -84,33 +98,48 @@ function readStore() {
   ensureStore();
 
   try {
-    const raw = fs.readFileSync(storageFilePath, "utf8");
-    const parsed = JSON.parse(raw);
-    return {
-      config: parsed.config ?? null,
-      state: { ...DEFAULT_STATE, ...(parsed.state ?? {}) },
-      logs: Array.isArray(parsed.logs) ? parsed.logs : [],
-    };
+    return normalizeStore(JSON.parse(fs.readFileSync(storageFilePath, "utf8")));
   } catch {
-    return { config: null, state: DEFAULT_STATE, logs: [] };
+    return readBackupStore();
   }
 }
 
 function writeStore(store) {
   ensureConfigured();
-  fs.writeFileSync(
-    storageFilePath,
-    JSON.stringify(
-      {
-        config: store.config ?? null,
-        state: { ...DEFAULT_STATE, ...(store.state ?? {}) },
-        logs: Array.isArray(store.logs) ? store.logs.slice(0, 120) : [],
-      },
-      null,
-      2,
-    ),
-    "utf8",
-  );
+  const directory = path.dirname(storageFilePath);
+  const backupPath = path.join(directory, STORE_BACKUP_FILE);
+  const tempPath = path.join(directory, STORE_TEMP_FILE);
+  const normalized = normalizeStore(store);
+  const payload = JSON.stringify(normalized, null, 2);
+
+  if (fs.existsSync(storageFilePath)) {
+    try {
+      fs.copyFileSync(storageFilePath, backupPath);
+    } catch {
+      // A falha de backup nao deve impedir a gravacao atomica do estado atual.
+    }
+  }
+
+  fs.writeFileSync(tempPath, payload, "utf8");
+  fs.renameSync(tempPath, storageFilePath);
+}
+
+function readBackupStore() {
+  const backupPath = path.join(path.dirname(storageFilePath), STORE_BACKUP_FILE);
+
+  try {
+    return normalizeStore(JSON.parse(fs.readFileSync(backupPath, "utf8")));
+  } catch {
+    return { config: null, state: { ...DEFAULT_STATE }, logs: [] };
+  }
+}
+
+function normalizeStore(store) {
+  return {
+    config: store?.config ?? null,
+    state: { ...DEFAULT_STATE, ...(store?.state ?? {}) },
+    logs: Array.isArray(store?.logs) ? store.logs.slice(0, 120) : [],
+  };
 }
 
 function canEncrypt() {
@@ -163,6 +192,13 @@ function decryptSecret(record) {
 
 function normalizeBaseUrl(value) {
   const url = new URL(String(value ?? "").trim());
+  const host = url.hostname.toLowerCase();
+  const isLocalHost = host === "localhost" || host === "127.0.0.1" || host === "::1";
+
+  if (url.protocol === "http:" && !isLocalHost) {
+    url.protocol = "https:";
+  }
+
   url.pathname = "";
   url.search = "";
   url.hash = "";

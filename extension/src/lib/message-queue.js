@@ -141,7 +141,7 @@ async function runNextMessage(reason) {
       message_id: activeLock.messageId,
     });
     await releaseMessageLock({
-      lastError: "Processamento anterior expirou após 60 segundos.",
+      lastError: "Processamento anterior expirou apos 60 segundos.",
     });
   }
 
@@ -172,6 +172,7 @@ async function runNextMessage(reason) {
       await patchRuntimeState({
         whatsappStatus: whatsappStatus.whatsapp_status,
         lastPollingAt: new Date().toISOString(),
+        lastError: getWhatsAppPausedMessage(whatsappStatus.whatsapp_status),
       });
       return {
         skipped: true,
@@ -298,6 +299,22 @@ async function processMessage(message) {
 
 function randomSendDelayMs() {
   return 3000 + Math.floor(Math.random() * 4001);
+}
+
+function getWhatsAppPausedMessage(status) {
+  if (status === "qr_required") {
+    return "Escaneie o QR Code para continuar os envios. As mensagens ficarao pendentes.";
+  }
+
+  if (status === "loading") {
+    return "WhatsApp carregando. O envio esta pausado ate a conexao ficar pronta.";
+  }
+
+  if (status === "error") {
+    return "Erro no WhatsApp Web. As mensagens ficarao pendentes e serao reenviadas depois.";
+  }
+
+  return "WhatsApp desconectado. As mensagens ficarao pendentes e serao enviadas quando reconectar.";
 }
 
 function delay(ms) {

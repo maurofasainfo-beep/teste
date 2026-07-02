@@ -9,6 +9,10 @@ const statusSchema = z.object({
   status: z.enum(["released", "completed", "cancelled"]),
 });
 
+const paramsSchema = z.object({
+  id: z.string().uuid(),
+});
+
 export async function POST(
   request: Request,
   context: { params: Promise<{ id: string }> },
@@ -19,7 +23,16 @@ export async function POST(
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
-  const { id } = await context.params;
+  if (session.profile.status !== "active" || session.company.status !== "active") {
+    return NextResponse.json({ error: "Empresa ou usuário inativo." }, { status: 403 });
+  }
+
+  const parsedParams = paramsSchema.safeParse(await context.params);
+
+  if (!parsedParams.success) {
+    return NextResponse.json({ error: "ID inválido." }, { status: 400 });
+  }
+
   const parsed = statusSchema.safeParse(await request.json());
 
   if (!parsed.success) {
@@ -52,17 +65,29 @@ export async function POST(
             cancelled_at: now,
             cancelled_by_customer: false,
           };
+  const allowedCurrentStatuses =
+    parsed.data.status === "released"
+      ? (["waiting"] as const)
+      : (["waiting", "released"] as const);
 
   const { data: queueEntry, error } = await supabase
     .from("queue_entries")
     .update(updatePayload)
-    .eq("id", id)
+    .eq("id", parsedParams.data.id)
     .eq("company_id", session.company.id)
+    .in("status", allowedCurrentStatuses)
     .select("*")
-    .single();
+    .maybeSingle();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  if (!queueEntry) {
+    return NextResponse.json(
+      { error: "Transição de status não permitida ou entrada já alterada." },
+      { status: 409 },
+    );
   }
 
   if (parsed.data.status === "released") {

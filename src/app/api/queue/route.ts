@@ -12,6 +12,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
+  if (context.profile.status !== "active" || context.company.status !== "active") {
+    return NextResponse.json({ error: "Empresa ou usuário inativo." }, { status: 403 });
+  }
+
   const parsed = queueEntrySchema.safeParse(await request.json());
 
   if (!parsed.success) {

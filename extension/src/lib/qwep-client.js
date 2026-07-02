@@ -23,6 +23,8 @@ export async function validateAuthentication(config) {
     throw new Error(body?.error ?? "Falha ao autenticar dispositivo.");
   }
 
+  ensureQwepJsonResponse(response, body);
+
   await patchRuntimeState({
     authStatus: "authenticated",
     deviceStatus: body.status ?? "active",
@@ -90,7 +92,7 @@ export async function sendHeartbeat(payload) {
 
   await patchRuntimeState({
     lastHeartbeatAt: new Date().toISOString(),
-    deviceStatus: response.device_status ?? "unknown",
+    deviceStatus: response.device_status ?? "not_configured",
     isPrimarySender: Boolean(response.is_primary_sender),
     pollingIntervalSeconds: Number(response.config?.polling_interval_seconds) || 30,
     heartbeatIntervalSeconds:
@@ -147,10 +149,34 @@ async function qwepRequest(path, options) {
   const body = await parseJson(response);
 
   if (!response.ok) {
-    throw new Error(body?.error ?? `Falha HTTP ${response.status}.`);
+    throw new Error(getResponseErrorMessage(body, response.status));
   }
 
+  ensureQwepJsonResponse(response, body);
+
   return body;
+}
+
+function getResponseErrorMessage(body, status) {
+  if (body?.error && body?.detail) {
+    return `${body.error}: ${body.detail}`;
+  }
+
+  if (body?.error) {
+    return body.error;
+  }
+
+  return `Falha HTTP ${status}.`;
+}
+
+function ensureQwepJsonResponse(response, body) {
+  const contentType = response.headers.get("content-type") ?? "";
+
+  if (!contentType.toLowerCase().includes("application/json") || body?.raw) {
+    throw new Error(
+      "API QWEP indisponivel nesta URL. O servidor respondeu HTML em vez de JSON. Verifique o deploy do Next.js/Netlify e as rotas /api/extension.",
+    );
+  }
 }
 
 async function parseJson(response) {

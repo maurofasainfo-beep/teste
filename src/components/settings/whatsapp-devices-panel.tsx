@@ -36,12 +36,18 @@ import {
 type WhatsAppDevicesPanelProps = {
   devices: WhatsAppDevice[];
   logs: WhatsAppDeviceLog[];
+  messageStatusSummary: {
+    pending: number;
+    retry: number;
+    failed: number;
+  };
   notificationChannel: NotificationChannel;
 };
 
 export function WhatsAppDevicesPanel({
   devices,
   logs,
+  messageStatusSummary,
   notificationChannel,
 }: WhatsAppDevicesPanelProps) {
   const [createState, createAction] = useActionState(
@@ -86,6 +92,26 @@ export function WhatsAppDevicesPanel({
           </div>
           <SubmitButton className="mt-4 w-full" icon={ShieldCheck} label="Salvar canal" />
         </form>
+      </div>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-3">
+        <MessageStatusMetric
+          detail="Aguardando o bot buscar."
+          label="Pendentes"
+          value={messageStatusSummary.pending}
+        />
+        <MessageStatusMetric
+          detail="Serao reenviadas automaticamente."
+          label="Em retry"
+          tone="warning"
+          value={messageStatusSummary.retry}
+        />
+        <MessageStatusMetric
+          detail="Precisam de analise."
+          label="Com falha"
+          tone="danger"
+          value={messageStatusSummary.failed}
+        />
       </div>
 
       <div className="mt-5 grid gap-5 xl:mt-6 xl:grid-cols-[340px_minmax(0,1fr)]">
@@ -197,6 +223,32 @@ function CredentialBlock({ label, value }: { label: string; value: string }) {
   );
 }
 
+function MessageStatusMetric({
+  detail,
+  label,
+  tone = "default",
+  value,
+}: {
+  detail: string;
+  label: string;
+  tone?: "default" | "warning" | "danger";
+  value: number;
+}) {
+  return (
+    <div
+      className={[
+        "rounded-lg border bg-background p-3",
+        tone === "warning" ? "border-warning/30 bg-warning/10" : "",
+        tone === "danger" ? "border-danger/30 bg-danger/10" : "",
+      ].join(" ")}
+    >
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="mt-1 text-2xl font-bold text-foreground">{value}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
+    </div>
+  );
+}
+
 function DeviceCard({ device }: { device: WhatsAppDevice }) {
   return (
     <article className="rounded-lg border bg-background p-4">
@@ -214,6 +266,8 @@ function DeviceCard({ device }: { device: WhatsAppDevice }) {
           <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
             <span>Ultimo heartbeat: {device.last_seen_at ? formatDateTime(device.last_seen_at) : "Nunca"}</span>
             <span>Telefone: {device.connected_phone ? maskPhone(device.connected_phone) : "Nao conectado"}</span>
+            <span>Ultima conexao: {device.last_connected_at ? formatDateTime(device.last_connected_at) : "Nunca"}</span>
+            <span>Ultima queda: {device.last_disconnected_at ? formatDateTime(device.last_disconnected_at) : "Nunca"}</span>
             <span>Versao: {device.extension_version ?? "Nao informada"}</span>
             <span>Navegador: {device.browser_name ?? "Nao informado"}</span>
           </div>

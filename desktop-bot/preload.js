@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld("queueBot", {
   testConnection: () => ipcRenderer.invoke("bot:test-connection"),
   startBot: () => ipcRenderer.invoke("bot:start"),
   stopBot: () => ipcRenderer.invoke("bot:stop"),
+  restartBot: () => ipcRenderer.invoke("bot:restart"),
   resetState: () => ipcRenderer.invoke("bot:reset-state"),
   openWhatsApp: () => ipcRenderer.invoke("bot:open-whatsapp"),
   refreshWhatsAppStatus: () => ipcRenderer.invoke("bot:refresh-whatsapp-status"),

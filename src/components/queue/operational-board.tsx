@@ -263,8 +263,13 @@ function QueueColumn({
 
       <div className="grid gap-3">
         <AnimatePresence initial={false}>
-          {entries.map((entry) => (
-            <QueueCard entry={entry} key={entry.id} variant={variant} />
+          {entries.map((entry, index) => (
+            <QueueCard
+              entry={entry}
+              isNextWaiting={variant === "waiting" && index === 0}
+              key={entry.id}
+              variant={variant}
+            />
           ))}
         </AnimatePresence>
         {entries.length === 0 ? (
@@ -282,16 +287,21 @@ function QueueColumn({
 
 function QueueCard({
   entry,
+  isNextWaiting,
   variant,
 }: {
   entry: QueueEntry;
+  isNextWaiting: boolean;
   variant: "waiting" | "released";
 }) {
+  const isWaitingOutOfOrder = variant === "waiting" && !isNextWaiting;
+
   return (
     <motion.article
       animate={{ opacity: 1, scale: 1, y: 0 }}
       className={cn(
         "rounded-lg border bg-background p-4 shadow-sm transition-all motion-safe:hover:-translate-y-0.5 motion-safe:hover:border-primary/30 motion-safe:hover:bg-card motion-safe:hover:shadow-[var(--shadow-soft)]",
+        isNextWaiting && "border-primary/40 bg-primary/5 ring-1 ring-primary/20",
         variant === "released" && "border-success/30 bg-success/5",
       )}
       exit={{ opacity: 0, scale: 0.98, y: -8 }}
@@ -305,6 +315,16 @@ function QueueCard({
               {entry.customer_name}
             </p>
             <StatusBadge status={entry.status} />
+            {isNextWaiting ? (
+              <span className="rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground">
+                Proximo
+              </span>
+            ) : null}
+            {isWaitingOutOfOrder ? (
+              <span className="rounded-full bg-warning/10 px-2.5 py-1 text-xs font-semibold text-warning">
+                Fora da ordem
+              </span>
+            ) : null}
           </div>
           <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1">
@@ -333,30 +353,48 @@ function QueueCard({
           compact
         />
         <div className="grid w-full gap-2 sm:grid-cols-3 lg:w-auto lg:flex lg:flex-wrap lg:justify-end">
-        {variant === "waiting" ? (
-          <form action={releaseQueueEntryAction} className="min-w-0">
+          {variant === "waiting" ? (
+            <form
+              action={releaseQueueEntryAction}
+              className="min-w-0"
+              onSubmit={(event) => {
+                if (
+                  isWaitingOutOfOrder &&
+                  !window.confirm(
+                    "Este cliente nao e o primeiro da fila. Deseja chamar mesmo assim?",
+                  )
+                ) {
+                  event.preventDefault();
+                }
+              }}
+            >
+              <input type="hidden" name="queue_entry_id" value={entry.id} />
+              <SubmitButton
+                className="w-full"
+                icon={BellRing}
+                label={isNextWaiting ? "Chamar proximo" : "Chamar"}
+                variant={isNextWaiting ? "default" : "secondary"}
+              />
+            </form>
+          ) : null}
+          <form action={completeQueueEntryAction} className="min-w-0">
             <input type="hidden" name="queue_entry_id" value={entry.id} />
-            <SubmitButton className="w-full" icon={BellRing} label="Chamar" />
+            <SubmitButton
+              className="w-full"
+              icon={Check}
+              label="Concluir"
+              variant="secondary"
+            />
           </form>
-        ) : null}
-        <form action={completeQueueEntryAction} className="min-w-0">
-          <input type="hidden" name="queue_entry_id" value={entry.id} />
-          <SubmitButton
-            className="w-full"
-            icon={Check}
-            label="Concluir"
-            variant="secondary"
-          />
-        </form>
-        <form action={cancelQueueEntryAction} className="min-w-0">
-          <input type="hidden" name="queue_entry_id" value={entry.id} />
-          <SubmitButton
-            className="w-full"
-            icon={X}
-            label="Cancelar"
-            variant="destructive"
-          />
-        </form>
+          <form action={cancelQueueEntryAction} className="min-w-0">
+            <input type="hidden" name="queue_entry_id" value={entry.id} />
+            <SubmitButton
+              className="w-full"
+              icon={X}
+              label="Cancelar"
+              variant="destructive"
+            />
+          </form>
         </div>
       </div>
     </motion.article>

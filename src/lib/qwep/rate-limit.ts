@@ -6,6 +6,19 @@ type RateBucket = {
 };
 
 const buckets = new Map<string, RateBucket>();
+const MAX_BUCKETS = 5_000;
+
+function pruneExpiredBuckets(now: number) {
+  if (buckets.size < MAX_BUCKETS) {
+    return;
+  }
+
+  for (const [bucketKey, bucket] of buckets.entries()) {
+    if (bucket.resetAt <= now) {
+      buckets.delete(bucketKey);
+    }
+  }
+}
 
 export function checkRateLimit({
   key,
@@ -17,6 +30,8 @@ export function checkRateLimit({
   windowMs: number;
 }) {
   const now = Date.now();
+  pruneExpiredBuckets(now);
+
   const current = buckets.get(key);
 
   if (!current || current.resetAt <= now) {
@@ -44,4 +59,3 @@ export function getClientIp(request: Request) {
 
   return request.headers.get("x-real-ip") ?? "unknown";
 }
-
