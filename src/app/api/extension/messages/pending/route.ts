@@ -46,7 +46,11 @@ function isMissingReserveRpcError(error: { code?: string; message?: string }) {
   const message = String(error.message ?? "").toLowerCase();
 
   return (
+    code === "42883" ||
     code === "PGRST202" ||
+    message.includes("function gen_random_bytes") ||
+    message.includes("function digest") ||
+    message.includes("pgcrypto") ||
     message.includes("reserve_pending_message_events") ||
     message.includes("schema cache")
   );
